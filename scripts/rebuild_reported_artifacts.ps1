@@ -143,6 +143,9 @@ try {
         Invoke-Step "Official AAAI PDF compile" {
             .\scripts\compile_paper.ps1
         }
+        Invoke-Step "Supplementary material PDF compile" {
+            .\scripts\compile_supplementary_material.ps1
+        }
         Invoke-Step "AAAI submission package" {
             .\scripts\build_submission_package.ps1 -SkipCompile
         }

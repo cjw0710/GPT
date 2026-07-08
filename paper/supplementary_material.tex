@@ -1,0 +1,208 @@
+\documentclass[10pt]{article}
+
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{caption}
+\usepackage{float}
+
+\newcommand{\method}{HARP-Select}
+\newcommand{\base}{HARP-GNN}
+\newcommand{\esep}{HARP-ESep}
+
+\title{Supplementary Material for HARP-Select}
+\author{Anonymous Authors}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Purpose of the Supplement}
+
+This supplement expands the anonymous main paper with details that do not fit
+in the seven-page AAAI submission format.  It is a frozen artifact companion:
+the tables below are generated from the included CSV files, and the verifier
+scripts check that the reported values match those CSVs.
+
+The main claim remains deliberately bounded.  \method{} is not presented as a
+universal heterophily leaderboard method.  It is an auditable way to compare a
+self-loop residual polynomial expert with an ego-separated no-self expert and
+to record when validation evidence justifies switching between them.
+
+\section{Algorithmic Details}
+
+\paragraph{Residual polynomial experts.}
+Both experts use the same residual polynomial filtering template, but they
+differ in how ego information enters propagation.  The self-loop expert uses
+the normalized adjacency with self-loops.  The ego-separated expert removes
+self-loops from propagation and carries ego features through a separate path
+before residual filtering.  This makes the branch identity a testable modeling
+choice rather than an implicit preprocessing convention.
+
+\paragraph{Selector rule.}
+For each split, both experts are trained independently using the prescribed
+training and validation masks.  Let $v_{\mathrm{self}}$ and
+$v_{\mathrm{esep}}$ be their validation scores, and let $\tau$ be the fixed
+normal-approximation uncertainty threshold used in the main paper.  The
+selector chooses
+\[
+  \mathrm{select} =
+  \begin{cases}
+  \esep, & v_{\mathrm{esep}} - v_{\mathrm{self}} > \tau,\\
+  \base, & \text{otherwise}.
+  \end{cases}
+\]
+The selected branch is frozen before test labels are read.  The artifact logs
+the validation margin, threshold, selected branch, oracle branch, and regret.
+
+\paragraph{Review-time audit procedure.}
+The intended audit sequence is:
+\begin{enumerate}
+  \item Verify that every reported config/result grid is complete.
+  \item Rebuild all generated tables from CSV files.
+  \item Check that paper text and table values match the rebuilt results.
+  \item Check that statistical claims do not exceed paired-test evidence.
+  \item Inspect selector decisions and oracle regret split by split.
+\end{enumerate}
+
+\section{Extended Main Tables}
+
+\subsection{HARP-Select Summary}
+
+\begin{table}[H]
+\centering
+\caption{\method{} summary over fixed splits.}
+\resizebox{\textwidth}{!}{%
+\input{tables/harp_select_results.tex}
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{\method{} versus the strongest implemented non-HARP baseline on the original six fixed-split heterophily datasets.}
+\input{tables/harp_select_paired_tests.tex}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Robust split-level checks for \method{} on the original six fixed-split heterophily datasets.}
+\resizebox{\textwidth}{!}{%
+\input{tables/harp_select_robust_tests.tex}
+}
+\end{table}
+
+\subsection{External Critical-Heterophily Accuracy Benchmarks}
+
+\begin{table}[H]
+\centering
+\caption{Full external critical-heterophily comparison including implemented non-HARP baselines and HARP branches.}
+\resizebox{\textwidth}{!}{%
+\input{tables/critical_heterophily_external_baselines.tex}
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Paired checks against the strongest implemented external non-HARP baseline.}
+\resizebox{\textwidth}{!}{%
+\input{tables/critical_heterophily_external_best_baseline_tests.tex}
+}
+\end{table}
+
+\subsection{Binary Critical-Heterophily ROC-AUC}
+
+\begin{table}[H]
+\centering
+\caption{Complete binary critical-heterophily branch comparisons under ROC-AUC.}
+\input{tables/critical_heterophily_binary_complete_paired_tests.tex}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Robust binary critical-heterophily branch checks under ROC-AUC.}
+\input{tables/critical_heterophily_binary_complete_robust_tests.tex}
+\end{table}
+
+\section{Selector Diagnostics}
+
+\begin{table}[H]
+\centering
+\caption{Threshold sensitivity for the validation-calibrated selector.}
+\input{tables/harp_select_threshold_sensitivity.tex}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{CPU training cost for two-expert routing.}
+\input{tables/harp_select_training_cost.tex}
+\end{table}
+
+\paragraph{Interpretation.}
+The selector is intentionally conservative.  This avoids converting small
+validation fluctuations into test-time architecture search, but it can miss
+small real branch advantages.  Amazon-Ratings is the clearest example: the
+ego-separated branch is slightly better on average, yet validation evidence is
+not strong enough to trigger switching.  Tolokers is the opposite binary
+stress test: removing ego/self information is consistently harmful.
+
+\section{Mechanistic Ablations}
+
+\begin{table}[H]
+\centering
+\caption{WebKB ablations isolating multi-hop mixing, low/high-pass residual branches, and the gate signal.}
+\input{tables/webkb_ablation_results.tex}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Learned HARP polynomial weights on WebKB.}
+\resizebox{\textwidth}{!}{%
+\input{tables/webkb_filter_weights.tex}
+}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{figures/harp_select_framework.png}
+\caption{\method{} trains two experts, records validation evidence, and freezes the branch decision before test evaluation.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{figures/harp_framework.png}
+\caption{Internal residual polynomial block used by the self-loop expert.}
+\end{figure}
+
+\clearpage
+\section{Reproducibility Checklist for Reported Numbers}
+
+The following scripts are the minimal checks for the numbers reported in the
+main paper and this supplement:
+\begin{verbatim}
+python scripts\verify_implementation.py
+python scripts\verify_manuscript_integrity.py
+python scripts\verify_reported_results.py
+python scripts\verify_top_conference_claims.py
+python scripts\verify_anonymous_artifact.py --root .
+\end{verbatim}
+
+The full packaging check additionally validates the official PDF, checklist,
+source package, supplementary artifact, synchronized packed sources, and LaTeX
+logs:
+\begin{verbatim}
+python scripts\verify_submission_readiness.py
+\end{verbatim}
+
+\section{Result Coverage Audit}
+
+\begin{table}[H]
+\centering
+\caption{Config/result coverage audit. Each row must be complete before a result is treated as reported evidence.}
+\resizebox{\textwidth}{!}{%
+\input{tables/result_audit.tex}
+}
+\end{table}
+
+\end{document}

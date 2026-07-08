@@ -28,5 +28,8 @@ paper/*.log
 paper/*.out
 paper/*.synctex.gz
 paper/*.pdf
+!paper/HARP_GNN_AAAI2027_official_compile.pdf
+!paper/HARP_GNN_AAAI2027_supplementary_material.pdf
+!paper/ReproducibilityChecklist_HARP_GNN.pdf
 paper/*.zip
 paper/HARP_GNN_AAAI2027_official_page*.png
