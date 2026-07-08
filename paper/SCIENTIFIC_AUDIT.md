@@ -8,7 +8,7 @@ This report is generated from the current CSV artifacts. It is meant to keep the
 - Paired tests currently show 0 significant positive HARP-GNN margins and 2 significant negative margins.
 - The strongest defensible claim is not state of the art; it is that low/high-pass residual fusion is useful on WebKB-like heterophily and easy to audit.
 - The main scientific risk is external validity: Chameleon and Squirrel favor H2GCN/LINKX by significant margins, and Planetoid favors established low-pass or simplified propagation baselines.
-- Binary ROC-AUC support is implemented; Minesweeper has a complete 10-split branch comparison, while Tolokers and Questions remain non-claim evidence.
+- Binary ROC-AUC support is implemented; Minesweeper and Tolokers have complete 10-split branch comparisons, while Questions remains smoke-only.
 
 ## Top-Conference Readiness Gate
 
@@ -25,8 +25,8 @@ Evidence trigger: HARP-GNN is best on 2/12 rows, within 1 pp on 1 additional row
 |---|---|---|---|
 | P0 | Competitive evidence below main-track bar | No significant positive paired margins; significant deficits on Chameleon and Squirrel | Either improve the method or re-scope the contribution to a narrower, explicitly diagnostic claim |
 | P0 | Baseline coverage is incomplete for a heterophily paper | Implemented baselines omit official-code FAGCN, BernNet, and newer 2025--2026 heterophily methods | Add license-compatible official or carefully reproduced baselines, with the same fixed splits and audit rows |
-| P0 | External strong-baseline coverage is incomplete | The frozen HARP-Select rule generalizes to Roman-Empire and remains conservative on Amazon-Ratings, but only HARP versus HARP-ESep has been run there | Add official or carefully reproduced strong baselines on the external datasets before moving HARP-Select into the main manuscript |
-| P1 | Binary critical-heterophily coverage is incomplete | ROC-AUC support and Minesweeper are complete, but Tolokers and Questions remain smoke or partial runs | Finish Tolokers/Questions and add a ROC-AUC-specific selector calibration before making binary-suite claims |
+| P0 | External strong-baseline coverage is incomplete | Roman-Empire and Amazon-Ratings include the implemented non-HARP suite, but still omit official-code FAGCN, BernNet, and newer 2025--2026 baselines | Add license-compatible official or carefully reproduced newer baselines on the external datasets before making broad competitiveness claims |
+| P1 | Binary critical-heterophily selector calibration is incomplete | ROC-AUC support and complete Minesweeper/Tolokers branch comparisons are present, but Questions remains smoke-only and no ROC-AUC-specific selector exists | Finish Questions if claiming the full binary suite, and add a ROC-AUC-specific calibration before applying HARP-Select to binary datasets |
 | P1 | Homophily fallback is weak | Synthetic high-homophily and Planetoid checks favor low-pass or simplified propagation baselines | Add an adaptive low-pass fallback, regularizer, or dataset-level branch prior and re-run Planetoid/synthetic checks |
 | P1 | Gate signal claim is fragile | HARP-NoSignal is close to the full model and better on Cornell | Treat local feature variation as a hypothesis, or redesign the gate around learned branch representations |
 | P1 | Statistical support remains thin | Bootstrap intervals, Wilcoxon tests, exact sign-flip tests, Holm correction, and fixed-threshold sensitivity are available for HARP-Select, but each dataset still has only 10 fixed splits and no significant positive margin | Add external datasets, more repeated seeds where valid, and keep the sensitivity diagnostic synchronized with regenerated selector outputs |
@@ -202,15 +202,16 @@ The candidate now has external validation, but still lacks strong official-code 
 
 ## Binary Critical-Heterophily ROC-AUC
 
-The binary critical-heterophily path now evaluates ROC-AUC rather than accuracy. The current manuscript reports the complete 10-split Minesweeper branch comparison only; Tolokers and Questions remain smoke or partial CPU runs.
+The binary critical-heterophily path evaluates ROC-AUC rather than accuracy. The current manuscript reports complete 10-split Minesweeper and Tolokers branch comparisons; Questions remains smoke-only and is not a main claim.
 
 | Dataset | Metric | HARP-GNN | HARP-ESep | Diff (pp) | W/T/L | Paired p | Sign-flip Holm p | Status |
 |---|---|---:|---:|---:|---:|---:|---:|---|
-| minesweeper | ROC-AUC | 88.18 +/- 0.84 | 89.64 +/- 0.67 | +1.45 | 10/0/0 | <0.001 | 0.002 | reported branch evidence |
+| minesweeper | ROC-AUC | 88.18 +/- 0.84 | 89.64 +/- 0.67 | +1.45 | 10/0/0 | <0.001 | 0.004 | reported positive branch evidence |
+| tolokers | ROC-AUC | 82.79 +/- 0.83 | 79.22 +/- 0.70 | -3.56 | 0/0/10 | <0.001 | 0.004 | reported negative branch evidence |
 
-Interpretation: Minesweeper supports the ego-separated branch under the official ROC-AUC protocol, but it is not a HARP-Select routing claim. The current selector threshold is derived from validation accuracy uncertainty and should not be reused for ROC-AUC without a separate calibration argument.
+Interpretation: Minesweeper supports the ego-separated branch under ROC-AUC, while Tolokers gives equally strong evidence in the opposite direction. These are branch-specialization results, not HARP-Select routing claims. The current selector threshold is derived from validation accuracy uncertainty and should not be reused for ROC-AUC without a separate calibration argument.
 The smoke file covers minesweeper, questions, tolokers with one split per branch and is treated as loader/protocol evidence only.
-The partial full-run trace currently contains 40 rows (minesweeper: 10 seeds, tolokers: 10 seeds). It is retained for reproducibility but not cited as a main result beyond the complete Minesweeper subset.
+The full binary branch trace currently contains 40 rows (minesweeper: 10 seeds, tolokers: 10 seeds).
 
 ## Claim Boundaries for the Current Draft
 
@@ -220,7 +221,7 @@ Safe claims:
 - On WebKB, HARP-GNN is strongest among the implemented baselines on Texas and Wisconsin, but paired margins are not significant at p < 0.05.
 - Learned WebKB filters and gates allocate substantial mass to first-order high-pass residual evidence.
 - As a separate candidate diagnostic, HARP-Select uses validation-only confidence routing to remove the original significant Chameleon/Squirrel deficits without creating a significant superiority claim.
-- On binary Minesweeper under ROC-AUC, HARP-ESep has a complete 10-split positive branch comparison against HARP-GNN; this does not extend to a HARP-Select routing claim.
+- On binary Minesweeper under ROC-AUC, HARP-ESep has a complete 10-split positive branch comparison against HARP-GNN; on Tolokers, the direction reverses and HARP-GNN is better. Neither row extends to a HARP-Select routing claim.
 - The artifact includes coverage checks, implementation invariants, manuscript/package checks, and final submission-readiness validation.
 
 Claims to avoid:
@@ -229,12 +230,12 @@ Claims to avoid:
 - Do not claim significant WebKB gains.
 - Do not claim speed superiority.
 - Do not present Planetoid as a tuned citation benchmark result.
-- Do not cite Tolokers or Questions as main binary critical-heterophily results until their full ROC-AUC runs are complete.
+- Do not cite Questions as a main binary critical-heterophily result until its full ROC-AUC run is complete.
 
 ## Next Scientific Moves
 
 1. Add strong official-code baselines on Roman-Empire and Amazon-Ratings under the same fixed masks.
-2. Finish Tolokers and Questions under ROC-AUC, then design a ROC-AUC-specific calibration rule before applying HARP-Select to binary datasets.
+2. Finish Questions under ROC-AUC if claiming the full binary suite, then design a ROC-AUC-specific calibration rule before applying HARP-Select to binary datasets.
 3. Investigate distillation, shared encoders, or early branch screening to reduce the measured two-specialist training cost.
 4. Improve the low-pass fallback so the model does not lose as much on homophilous/citation graphs.
 5. Keep the frozen-threshold sensitivity and calibration diagnostic synchronized, without selecting the threshold on test performance.

@@ -21,6 +21,7 @@ CHECKLIST_TEX = PAPER / "ReproducibilityChecklist_HARP_GNN.tex"
 CHECKLIST_PDF = PAPER / "ReproducibilityChecklist_HARP_GNN.pdf"
 SUPPLEMENTARY_MATERIAL_TEX = PAPER / "supplementary_material.tex"
 SUPPLEMENTARY_MATERIAL_PDF = PAPER / "HARP_GNN_AAAI2027_supplementary_material.pdf"
+REVIEWER_RISK_AUDIT = PAPER / "REVIEWER_RISK_AUDIT.md"
 MAIN_TEX = PAPER / "main.tex"
 MAX_TECHNICAL_PAGES = 7
 MIN_SUPPLEMENTARY_PAGES = 4
@@ -119,6 +120,7 @@ def check_core_artifacts() -> list[str]:
     _assert_file(CHECKLIST_PDF, min_bytes=10_000)
     _assert_file(SUPPLEMENTARY_MATERIAL_TEX, min_bytes=1000)
     _assert_file(SUPPLEMENTARY_MATERIAL_PDF, min_bytes=100_000)
+    _assert_file(REVIEWER_RISK_AUDIT, min_bytes=1000)
     return ["primary paper, checklist, and package artifacts exist with plausible sizes"]
 
 
@@ -216,6 +218,21 @@ def check_supplementary_material() -> list[str]:
         f"Supplementary material has only {page_count} pages; expected at least {MIN_SUPPLEMENTARY_PAGES}",
     )
     return [f"supplementary material PDF compiles and remains anonymous ({page_count} pages)"]
+
+
+def check_reviewer_risk_audit() -> list[str]:
+    text = _read_text(REVIEWER_RISK_AUDIT)
+    required = [
+        "Likely Reviewer Concerns",
+        "Claim Boundaries To Preserve",
+        "Minimum Pre-Submission Checklist",
+        "state-of-the-art",
+        "TL;DR",
+    ]
+    missing = [item for item in required if item not in text]
+    _require(not missing, "Reviewer risk audit is missing required content: " + ", ".join(missing))
+    _require("github.com" not in text.lower(), "Reviewer risk audit should not include a mutable GitHub URL")
+    return ["reviewer risk audit records likely objections and claim boundaries"]
 
 
 def check_pdf_previews() -> list[str]:
@@ -375,6 +392,7 @@ def check_supplementary_zip() -> list[str]:
         root + "paper/main.tex",
         root + "paper/supplementary_material.tex",
         root + "paper/AAAI27_SUBMISSION_REQUIREMENTS.md",
+        root + "paper/REVIEWER_RISK_AUDIT.md",
         root + "paper/references_additions.bib",
         root + "paper/SCIENTIFIC_AUDIT.md",
         root + "paper/HARP_X_DIAGNOSTIC.md",
@@ -421,6 +439,11 @@ def check_supplementary_zip() -> list[str]:
         "Supplementary artifact supplementary_material.tex is stale relative to paper/supplementary_material.tex",
     )
     _require(
+        _zip_read(SUPPLEMENTARY_ZIP, root + "paper/REVIEWER_RISK_AUDIT.md")
+        == _read_bytes(REVIEWER_RISK_AUDIT),
+        "Supplementary artifact REVIEWER_RISK_AUDIT.md is stale relative to paper/REVIEWER_RISK_AUDIT.md",
+    )
+    _require(
         _zip_read(SUPPLEMENTARY_ZIP, root + "paper/HARP_GNN_AAAI2027_supplementary_material.pdf")
         == _read_bytes(SUPPLEMENTARY_MATERIAL_PDF),
         "Supplementary artifact supplementary material PDF is stale relative to the current supplementary PDF",
@@ -434,6 +457,7 @@ def run_checks() -> list[str]:
     messages.extend(check_manuscript_source())
     messages.extend(check_latex_logs())
     messages.extend(check_supplementary_material())
+    messages.extend(check_reviewer_risk_audit())
     messages.extend(check_pdf_previews())
     messages.extend(check_pdf_font_format())
     messages.extend(check_checklist())

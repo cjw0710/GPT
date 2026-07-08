@@ -561,10 +561,9 @@ def _optional_harp_select_section() -> list[str]:
 
 
 def _optional_binary_critical_section() -> list[str]:
-    result_path = ROOT / "results" / "critical_heterophily_binary_minesweeper.csv"
-    paired_path = ROOT / "results" / "critical_heterophily_binary_minesweeper_paired_tests.csv"
-    robust_path = ROOT / "results" / "critical_heterophily_binary_minesweeper_robust_tests.csv"
-    partial_path = ROOT / "results" / "critical_heterophily_binary_harp.csv"
+    result_path = ROOT / "results" / "critical_heterophily_binary_harp.csv"
+    paired_path = ROOT / "results" / "critical_heterophily_binary_complete_paired_tests.csv"
+    robust_path = ROOT / "results" / "critical_heterophily_binary_complete_robust_tests.csv"
     smoke_path = ROOT / "results" / "critical_heterophily_binary_smoke.csv"
     if not result_path.exists() or not paired_path.exists() or not robust_path.exists():
         return []
@@ -577,38 +576,50 @@ def _optional_binary_critical_section() -> list[str]:
         .agg(["mean", "std", "count"])
         .reset_index()
     )
-    rows = {str(row.model): row for row in grouped.itertuples(index=False)}
-    paired_row = paired.loc["minesweeper"]
-    robust_row = robust.loc["minesweeper"]
 
     lines = [
         "## Binary Critical-Heterophily ROC-AUC",
         "",
-        "The binary critical-heterophily path now evaluates ROC-AUC rather than accuracy. The current manuscript reports the complete 10-split Minesweeper branch comparison only; Tolokers and Questions remain smoke or partial CPU runs.",
+        "The binary critical-heterophily path evaluates ROC-AUC rather than accuracy. The current manuscript reports complete 10-split Minesweeper and Tolokers branch comparisons; Questions remains smoke-only and is not a main claim.",
         "",
         "| Dataset | Metric | HARP-GNN | HARP-ESep | Diff (pp) | W/T/L | Paired p | Sign-flip Holm p | Status |",
         "|---|---|---:|---:|---:|---:|---:|---:|---|",
-        "| "
-        + " | ".join(
-            [
-                "minesweeper",
-                "ROC-AUC",
-                _mean_std(float(rows["harp"].mean), 0.0 if pd.isna(rows["harp"].std) else float(rows["harp"].std)),
-                _mean_std(
-                    float(rows["harp_esep"].mean),
-                    0.0 if pd.isna(rows["harp_esep"].std) else float(rows["harp_esep"].std),
-                ),
-                _signed_pp(float(paired_row["diff_mean"])),
-                f"{int(robust_row['wins'])}/{int(robust_row['ties'])}/{int(robust_row['losses'])}",
-                _p_value(float(paired_row["p_value"])),
-                _p_value(float(robust_row["sign_flip_p_holm"])),
-                "reported branch evidence",
-            ]
-        )
-        + " |",
-        "",
-        "Interpretation: Minesweeper supports the ego-separated branch under the official ROC-AUC protocol, but it is not a HARP-Select routing claim. The current selector threshold is derived from validation accuracy uncertainty and should not be reused for ROC-AUC without a separate calibration argument.",
     ]
+    for dataset in sorted(paired.index.astype(str)):
+        part = grouped[grouped["dataset"].astype(str) == dataset]
+        rows = {str(row.model): row for row in part.itertuples(index=False)}
+        if "harp" not in rows or "harp_esep" not in rows or dataset not in robust.index:
+            continue
+        paired_row = paired.loc[dataset]
+        robust_row = robust.loc[dataset]
+        diff = float(paired_row["diff_mean"])
+        status = "reported positive branch evidence" if diff > 0 else "reported negative branch evidence"
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    dataset,
+                    "ROC-AUC",
+                    _mean_std(float(rows["harp"].mean), 0.0 if pd.isna(rows["harp"].std) else float(rows["harp"].std)),
+                    _mean_std(
+                        float(rows["harp_esep"].mean),
+                        0.0 if pd.isna(rows["harp_esep"].std) else float(rows["harp_esep"].std),
+                    ),
+                    _signed_pp(diff),
+                    f"{int(robust_row['wins'])}/{int(robust_row['ties'])}/{int(robust_row['losses'])}",
+                    _p_value(float(paired_row["p_value"])),
+                    _p_value(float(robust_row["sign_flip_p_holm"])),
+                    status,
+                ]
+            )
+            + " |"
+        )
+    lines.extend(
+        [
+            "",
+            "Interpretation: Minesweeper supports the ego-separated branch under ROC-AUC, while Tolokers gives equally strong evidence in the opposite direction. These are branch-specialization results, not HARP-Select routing claims. The current selector threshold is derived from validation accuracy uncertainty and should not be reused for ROC-AUC without a separate calibration argument.",
+        ]
+    )
 
     if smoke_path.exists():
         smoke = pd.read_csv(smoke_path)
@@ -618,20 +629,9 @@ def _optional_binary_critical_section() -> list[str]:
                 f"The smoke file covers {smoke_datasets} with one split per branch and is treated as loader/protocol evidence only.",
             ]
         )
-    if partial_path.exists():
-        partial = pd.read_csv(partial_path)
-        coverage = (
-            partial.groupby("dataset")["seed"]
-            .nunique()
-            .sort_index()
-            .to_dict()
-        )
-        coverage_text = ", ".join(f"{dataset}: {count} seeds" for dataset, count in coverage.items())
-        lines.extend(
-            [
-                f"The partial full-run trace currently contains {len(partial)} rows ({coverage_text}). It is retained for reproducibility but not cited as a main result beyond the complete Minesweeper subset.",
-            ]
-        )
+    coverage = df.groupby("dataset")["seed"].nunique().sort_index().to_dict()
+    coverage_text = ", ".join(f"{dataset}: {count} seeds" for dataset, count in coverage.items())
+    lines.append(f"The full binary branch trace currently contains {len(df)} rows ({coverage_text}).")
 
     lines.append("")
     return lines
@@ -665,8 +665,8 @@ def _top_conference_risk_register(
         "|---|---|---|---|",
         "| P0 | Competitive evidence below main-track bar | No significant positive paired margins; significant deficits on Chameleon and Squirrel | Either improve the method or re-scope the contribution to a narrower, explicitly diagnostic claim |",
         "| P0 | Baseline coverage is incomplete for a heterophily paper | Implemented baselines omit official-code FAGCN, BernNet, and newer 2025--2026 heterophily methods | Add license-compatible official or carefully reproduced baselines, with the same fixed splits and audit rows |",
-        "| P0 | External strong-baseline coverage is incomplete | The frozen HARP-Select rule generalizes to Roman-Empire and remains conservative on Amazon-Ratings, but only HARP versus HARP-ESep has been run there | Add official or carefully reproduced strong baselines on the external datasets before moving HARP-Select into the main manuscript |",
-        "| P1 | Binary critical-heterophily coverage is incomplete | ROC-AUC support and Minesweeper are complete, but Tolokers and Questions remain smoke or partial runs | Finish Tolokers/Questions and add a ROC-AUC-specific selector calibration before making binary-suite claims |",
+        "| P0 | External strong-baseline coverage is incomplete | Roman-Empire and Amazon-Ratings include the implemented non-HARP suite, but still omit official-code FAGCN, BernNet, and newer 2025--2026 baselines | Add license-compatible official or carefully reproduced newer baselines on the external datasets before making broad competitiveness claims |",
+        "| P1 | Binary critical-heterophily selector calibration is incomplete | ROC-AUC support and complete Minesweeper/Tolokers branch comparisons are present, but Questions remains smoke-only and no ROC-AUC-specific selector exists | Finish Questions if claiming the full binary suite, and add a ROC-AUC-specific calibration before applying HARP-Select to binary datasets |",
         "| P1 | Homophily fallback is weak | Synthetic high-homophily and Planetoid checks favor low-pass or simplified propagation baselines | Add an adaptive low-pass fallback, regularizer, or dataset-level branch prior and re-run Planetoid/synthetic checks |",
         "| P1 | Gate signal claim is fragile | HARP-NoSignal is close to the full model and better on Cornell | Treat local feature variation as a hypothesis, or redesign the gate around learned branch representations |",
         "| P1 | Statistical support remains thin | Bootstrap intervals, Wilcoxon tests, exact sign-flip tests, Holm correction, and fixed-threshold sensitivity are available for HARP-Select, but each dataset still has only 10 fixed splits and no significant positive margin | Add external datasets, more repeated seeds where valid, and keep the sensitivity diagnostic synchronized with regenerated selector outputs |",
@@ -709,7 +709,7 @@ def generate_report(output: Path) -> None:
     if (ROOT / "results" / "critical_heterophily_binary_minesweeper.csv").exists():
         lines.insert(
             len(lines) - 1,
-            "- Binary ROC-AUC support is implemented; Minesweeper has a complete 10-split branch comparison, while Tolokers and Questions remain non-claim evidence.",
+            "- Binary ROC-AUC support is implemented; Minesweeper and Tolokers have complete 10-split branch comparisons, while Questions remains smoke-only.",
         )
     lines.extend(
         _top_conference_risk_register(
@@ -748,7 +748,7 @@ def generate_report(output: Path) -> None:
             "- On WebKB, HARP-GNN is strongest among the implemented baselines on Texas and Wisconsin, but paired margins are not significant at p < 0.05.",
             "- Learned WebKB filters and gates allocate substantial mass to first-order high-pass residual evidence.",
             "- As a separate candidate diagnostic, HARP-Select uses validation-only confidence routing to remove the original significant Chameleon/Squirrel deficits without creating a significant superiority claim.",
-            "- On binary Minesweeper under ROC-AUC, HARP-ESep has a complete 10-split positive branch comparison against HARP-GNN; this does not extend to a HARP-Select routing claim.",
+            "- On binary Minesweeper under ROC-AUC, HARP-ESep has a complete 10-split positive branch comparison against HARP-GNN; on Tolokers, the direction reverses and HARP-GNN is better. Neither row extends to a HARP-Select routing claim.",
             "- The artifact includes coverage checks, implementation invariants, manuscript/package checks, and final submission-readiness validation.",
             "",
             "Claims to avoid:",
@@ -757,12 +757,12 @@ def generate_report(output: Path) -> None:
             "- Do not claim significant WebKB gains.",
             "- Do not claim speed superiority.",
             "- Do not present Planetoid as a tuned citation benchmark result.",
-            "- Do not cite Tolokers or Questions as main binary critical-heterophily results until their full ROC-AUC runs are complete.",
+            "- Do not cite Questions as a main binary critical-heterophily result until its full ROC-AUC run is complete.",
             "",
             "## Next Scientific Moves",
             "",
             "1. Add strong official-code baselines on Roman-Empire and Amazon-Ratings under the same fixed masks.",
-            "2. Finish Tolokers and Questions under ROC-AUC, then design a ROC-AUC-specific calibration rule before applying HARP-Select to binary datasets.",
+            "2. Finish Questions under ROC-AUC if claiming the full binary suite, then design a ROC-AUC-specific calibration rule before applying HARP-Select to binary datasets.",
             "3. Investigate distillation, shared encoders, or early branch screening to reduce the measured two-specialist training cost.",
             "4. Improve the low-pass fallback so the model does not lose as much on homophilous/citation graphs.",
             "5. Keep the frozen-threshold sensitivity and calibration diagnostic synchronized, without selecting the threshold on test performance.",

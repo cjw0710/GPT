@@ -97,6 +97,7 @@ foreach ($PaperFile in @(
     "paper\aaai2027.bst",
     "paper\ARTIFACT_MANIFEST.md",
     "paper\AAAI27_SUBMISSION_REQUIREMENTS.md",
+    "paper\REVIEWER_RISK_AUDIT.md",
     "paper\SCIENTIFIC_AUDIT.md",
     "paper\HARP_X_DIAGNOSTIC.md",
     "paper\HARP_SELECT_DIAGNOSTIC.md",
