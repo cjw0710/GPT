@@ -1,0 +1,56 @@
+output: results/ablation_synthetic.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2]
+
+training:
+  epochs: 160
+  patience: 35
+  hidden_dim: 64
+  dropout: 0.45
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: synthetic_h020
+    type: synthetic
+    params:
+      num_classes: 3
+      nodes_per_class: 100
+      feature_dim: 64
+      avg_degree: 10
+      homophily: 0.20
+      feature_noise: 1.0
+      train_per_class: 20
+      val_per_class: 25
+  - name: synthetic_h050
+    type: synthetic
+    params:
+      num_classes: 3
+      nodes_per_class: 100
+      feature_dim: 64
+      avg_degree: 10
+      homophily: 0.50
+      feature_noise: 1.0
+      train_per_class: 20
+      val_per_class: 25
+
+models:
+  - name: harp
+    params:
+      hops: 3
+      branch_mode: both
+      use_gate_signal: true
+  - name: harp_low
+    params:
+      hops: 3
+      branch_mode: low
+  - name: harp_high
+    params:
+      hops: 3
+      branch_mode: high
+  - name: harp_no_signal
+    params:
+      hops: 3
+      branch_mode: both
+      use_gate_signal: false

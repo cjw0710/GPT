@@ -1,0 +1,71 @@
+output: results/pubmed_baseline_tuning.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 500
+  patience: 120
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: pubmed
+    type: planetoid
+    dataset: pubmed
+
+models:
+  - name: mlp_reference
+    params:
+      type: mlp
+  - name: gcn_nobias_lowwd
+    params:
+      type: gcn
+      weight_decay: 0.0
+  - name: gcn_bias
+    params:
+      type: gcn
+      bias: true
+  - name: gcn_bias_lowwd
+    params:
+      type: gcn
+      bias: true
+      weight_decay: 0.0
+  - name: gcn_bias_lowlr
+    params:
+      type: gcn
+      bias: true
+      lr: 0.005
+  - name: sgc_h1_lowwd
+    params:
+      type: sgc
+      hops: 1
+      lr: 0.05
+      weight_decay: 0.0
+  - name: sgc_h2_lowwd
+    params:
+      type: sgc
+      hops: 2
+      lr: 0.05
+      weight_decay: 0.0
+  - name: sgc_h2_lowlr
+    params:
+      type: sgc
+      hops: 2
+      lr: 0.005
+      weight_decay: 0.0
+  - name: appnp_lowlr
+    params:
+      type: appnp
+      hops: 10
+      alpha: 0.1
+      lr: 0.002
+  - name: appnp_lowlr_lowwd
+    params:
+      type: appnp
+      hops: 10
+      alpha: 0.1
+      lr: 0.002
+      weight_decay: 0.0

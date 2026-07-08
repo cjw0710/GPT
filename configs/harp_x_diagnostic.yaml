@@ -1,0 +1,87 @@
+output: results/harp_x_diagnostic.csv
+data_root: data
+device: auto
+seeds: [0, 1]
+
+training:
+  epochs: 250
+  patience: 60
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: texas
+    type: geom_gcn
+    dataset: texas
+    make_undirected: true
+  - name: wisconsin
+    type: geom_gcn
+    dataset: wisconsin
+    make_undirected: true
+  - name: cornell
+    type: geom_gcn
+    dataset: cornell
+    make_undirected: true
+  - name: actor
+    type: geom_gcn
+    dataset: actor
+    make_undirected: true
+  - name: chameleon
+    type: geom_gcn
+    dataset: chameleon
+    make_undirected: true
+  - name: squirrel
+    type: geom_gcn
+    dataset: squirrel
+    make_undirected: true
+
+models:
+  - name: linkx
+  - name: h2gcn
+    params:
+      layers: 2
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5
+      propagate_projected: true
+  - name: harp_x
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5
+      propagate_projected: true
+  - name: harp_sgate
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5
+      propagate_projected: true
+  - name: harp_esep
+    params:
+      hops: 2
+      use_layer_norm: true
+      gate_bias_init: -1.0
+  - name: harp_adaptive
+    params:
+      harp_hops: 3
+      esep_hops: 2
+      use_layer_norm: true
+      harp_gate_bias_init: -1.5
+      esep_gate_bias_init: -1.0
+      selector_bias_init: 0.0
+      selector_granularity: scalar
+      propagate_projected: true
+  - name: harp_blend
+    params:
+      harp_hops: 3
+      esep_hops: 2
+      use_layer_norm: true
+      harp_gate_bias_init: -1.5
+      esep_gate_bias_init: -1.0
+      blend_logit_init: 0.0
+      auxiliary_weight: 0.2
+      propagate_projected: true

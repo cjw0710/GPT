@@ -1,0 +1,40 @@
+output: results/planetoid_all.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2, 3, 4]
+
+training:
+  epochs: 400
+  patience: 100
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: cora
+    type: planetoid
+    dataset: cora
+  - name: citeseer
+    type: planetoid
+    dataset: citeseer
+  - name: pubmed
+    type: planetoid
+    dataset: pubmed
+
+models:
+  - name: mlp
+  - name: gcn
+  - name: sgc
+    params:
+      hops: 2
+  - name: appnp
+    params:
+      hops: 10
+      alpha: 0.1
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5
+      propagate_projected: true

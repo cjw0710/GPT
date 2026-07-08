@@ -1,0 +1,63 @@
+output: results/synthetic_sweep.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2]
+
+training:
+  epochs: 160
+  patience: 35
+  hidden_dim: 64
+  dropout: 0.45
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: synthetic_h020
+    type: synthetic
+    params:
+      num_classes: 3
+      nodes_per_class: 100
+      feature_dim: 64
+      avg_degree: 10
+      homophily: 0.20
+      feature_noise: 1.0
+      train_per_class: 20
+      val_per_class: 25
+  - name: synthetic_h050
+    type: synthetic
+    params:
+      num_classes: 3
+      nodes_per_class: 100
+      feature_dim: 64
+      avg_degree: 10
+      homophily: 0.50
+      feature_noise: 1.0
+      train_per_class: 20
+      val_per_class: 25
+  - name: synthetic_h080
+    type: synthetic
+    params:
+      num_classes: 3
+      nodes_per_class: 100
+      feature_dim: 64
+      avg_degree: 10
+      homophily: 0.80
+      feature_noise: 1.0
+      train_per_class: 20
+      val_per_class: 25
+
+models:
+  - name: mlp
+  - name: gcn
+  - name: sgc
+    params:
+      hops: 2
+  - name: appnp
+    params:
+      hops: 8
+      alpha: 0.1
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5

@@ -1,0 +1,23 @@
+output: results/webkb_h2gcn_smoke.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 30
+  patience: 10
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: texas
+    type: geom_gcn
+    dataset: texas
+    make_undirected: true
+
+models:
+  - name: h2gcn
+    params:
+      layers: 2

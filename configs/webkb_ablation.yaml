@@ -1,0 +1,55 @@
+output: results/webkb_ablation.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+training:
+  epochs: 250
+  patience: 60
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: texas
+    type: geom_gcn
+    dataset: texas
+    make_undirected: true
+  - name: wisconsin
+    type: geom_gcn
+    dataset: wisconsin
+    make_undirected: true
+  - name: cornell
+    type: geom_gcn
+    dataset: cornell
+    make_undirected: true
+
+models:
+  - name: mixhop
+    params:
+      powers: [0, 1, 2]
+  - name: harp
+    params:
+      hops: 3
+      branch_mode: both
+      use_gate_signal: true
+      use_layer_norm: true
+      gate_bias_init: -1.5
+  - name: harp_low
+    params:
+      hops: 3
+      branch_mode: low
+      use_layer_norm: true
+  - name: harp_high
+    params:
+      hops: 3
+      branch_mode: high
+      use_layer_norm: true
+  - name: harp_no_signal
+    params:
+      hops: 3
+      branch_mode: both
+      use_gate_signal: false
+      use_layer_norm: true
+      gate_bias_init: -1.5

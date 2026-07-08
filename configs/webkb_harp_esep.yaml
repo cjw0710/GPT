@@ -1,0 +1,33 @@
+output: results/webkb_harp_esep.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+training:
+  epochs: 250
+  patience: 60
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: texas
+    type: geom_gcn
+    dataset: texas
+    make_undirected: true
+  - name: wisconsin
+    type: geom_gcn
+    dataset: wisconsin
+    make_undirected: true
+  - name: cornell
+    type: geom_gcn
+    dataset: cornell
+    make_undirected: true
+
+models:
+  - name: harp_esep
+    params:
+      hops: 2
+      use_layer_norm: true
+      gate_bias_init: -1.0

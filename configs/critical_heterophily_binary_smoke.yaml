@@ -1,0 +1,37 @@
+output: results/critical_heterophily_binary_smoke.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 80
+  patience: 20
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+  metric: roc_auc
+
+datasets:
+  - name: minesweeper
+    type: heterophilous_graphs
+    dataset: minesweeper
+  - name: tolokers
+    type: heterophilous_graphs
+    dataset: tolokers
+  - name: questions
+    type: heterophilous_graphs
+    dataset: questions
+
+models:
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5
+      propagate_projected: true
+  - name: harp_esep
+    params:
+      hops: 2
+      use_layer_norm: true
+      gate_bias_init: -1.0

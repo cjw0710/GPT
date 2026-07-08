@@ -1,0 +1,33 @@
+output: results/critical_heterophily_smoke.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 80
+  patience: 20
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: roman-empire
+    type: heterophilous_graphs
+    dataset: roman-empire
+  - name: amazon-ratings
+    type: heterophilous_graphs
+    dataset: amazon-ratings
+
+models:
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5
+      propagate_projected: true
+  - name: harp_esep
+    params:
+      hops: 2
+      use_layer_norm: true
+      gate_bias_init: -1.0

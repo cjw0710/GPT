@@ -1,0 +1,33 @@
+output: results/smoke.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 20
+  patience: 8
+  hidden_dim: 32
+  dropout: 0.35
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: smoke_h030
+    type: synthetic
+    params:
+      num_classes: 3
+      nodes_per_class: 60
+      feature_dim: 32
+      avg_degree: 8
+      homophily: 0.30
+      feature_noise: 0.8
+      train_per_class: 12
+      val_per_class: 12
+
+models:
+  - name: mlp
+  - name: gcn
+  - name: harp
+    params:
+      hops: 3
+      gate_bias_init: -1.5

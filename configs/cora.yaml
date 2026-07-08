@@ -1,0 +1,33 @@
+output: results/cora.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2]
+
+training:
+  epochs: 300
+  patience: 80
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: cora
+    type: planetoid
+    dataset: cora
+
+models:
+  - name: mlp
+  - name: gcn
+  - name: sgc
+    params:
+      hops: 2
+  - name: appnp
+    params:
+      hops: 10
+      alpha: 0.1
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5

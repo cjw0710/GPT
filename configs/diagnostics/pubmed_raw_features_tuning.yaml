@@ -1,0 +1,40 @@
+output: results/pubmed_raw_features_tuning.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 500
+  patience: 120
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: pubmed_raw
+    type: planetoid
+    dataset: pubmed
+    normalize_features: false
+
+models:
+  - name: mlp_raw
+    params:
+      type: mlp
+  - name: gcn_raw
+    params:
+      type: gcn
+  - name: gcn_raw_bias
+    params:
+      type: gcn
+      bias: true
+  - name: sgc_raw_h2
+    params:
+      type: sgc
+      hops: 2
+  - name: appnp_raw_lowlr
+    params:
+      type: appnp
+      hops: 10
+      alpha: 0.1
+      lr: 0.002

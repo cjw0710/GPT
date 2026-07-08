@@ -1,0 +1,55 @@
+output: results/geom_gcn_large.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+training:
+  epochs: 250
+  patience: 60
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: chameleon
+    type: geom_gcn
+    dataset: chameleon
+    make_undirected: true
+  - name: squirrel
+    type: geom_gcn
+    dataset: squirrel
+    make_undirected: true
+  - name: actor
+    type: geom_gcn
+    dataset: actor
+    make_undirected: true
+
+models:
+  - name: mlp
+  - name: gcn
+  - name: sgc
+    params:
+      hops: 2
+  - name: appnp
+    params:
+      hops: 10
+      alpha: 0.1
+  - name: mixhop
+    params:
+      powers: [0, 1, 2]
+  - name: gprgnn
+    params:
+      hops: 10
+      alpha: 0.1
+      init: ppr
+  - name: h2gcn
+    params:
+      layers: 2
+  - name: linkx
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5
+      propagate_projected: true

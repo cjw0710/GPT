@@ -1,0 +1,43 @@
+output: results/critical_heterophily_baselines.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+training:
+  epochs: 250
+  patience: 60
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: roman-empire
+    type: heterophilous_graphs
+    dataset: roman-empire
+  - name: amazon-ratings
+    type: heterophilous_graphs
+    dataset: amazon-ratings
+
+models:
+  - name: mlp
+  - name: gcn
+  - name: sgc
+    params:
+      hops: 2
+  - name: appnp
+    params:
+      hops: 10
+      alpha: 0.1
+  - name: mixhop
+    params:
+      powers: [0, 1, 2]
+  - name: gprgnn
+    params:
+      hops: 10
+      alpha: 0.1
+      init: ppr
+  - name: h2gcn
+    params:
+      layers: 2
+  - name: linkx

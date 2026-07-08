@@ -1,0 +1,32 @@
+output: results/planetoid_smoke.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 80
+  patience: 25
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: cora
+    type: planetoid
+    dataset: cora
+  - name: citeseer
+    type: planetoid
+    dataset: citeseer
+  - name: pubmed
+    type: planetoid
+    dataset: pubmed
+
+models:
+  - name: mlp
+  - name: gcn
+  - name: harp
+    params:
+      hops: 3
+      use_layer_norm: true
+      gate_bias_init: -1.5

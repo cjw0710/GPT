@@ -1,0 +1,4 @@
+dataset,nodes,edges,features,classes,train,val,test,edge_homophily
+texas,183,279,1703,5,87,59,37,0.06093189964157706
+wisconsin,251,450,1703,5,120,80,51,0.17777777777777778
+cornell,183,277,1703,5,87,59,37,0.12274368231046931

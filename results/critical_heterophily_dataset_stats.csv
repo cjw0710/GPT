@@ -1,0 +1,3 @@
+dataset,nodes,edges,features,classes,train,val,test,edge_homophily
+roman-empire,22662,32927,300,18,11331,5665,5666,0.04689160871017706
+amazon-ratings,24492,93050,300,5,12246,6123,6123,0.3803761418592155

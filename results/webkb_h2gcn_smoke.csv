@@ -1,0 +1,2 @@
+dataset,model,seed,train_acc,val_acc,test_acc,train_loss,val_loss,test_loss,best_epoch,elapsed_sec,meta_dataset_type,meta_source,meta_split_id,meta_make_undirected,meta_num_nodes,meta_num_edges,meta_edge_homophily
+texas,h2gcn,0,1.0,0.8644067645072937,0.8648648858070374,0.0008703043567948043,0.6535393595695496,0.7942346930503845,23,0.09413552284240723,geom_gcn,texas,0,True,183,279,0.06093189964157706
