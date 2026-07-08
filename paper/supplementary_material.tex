@@ -67,6 +67,43 @@ The intended audit sequence is:
   \item Inspect selector decisions and oracle regret split by split.
 \end{enumerate}
 
+\section{Filter-Response Interpretation}
+
+The residual branch has a direct polynomial-filter interpretation.  Suppose
+the normalized self-loop operator has eigendecomposition
+$\hat A=Q\Lambda Q^\top$.  For any feature column, the low-pass branch applies
+\[
+  p_L(\lambda)=\sum_{k=0}^{K}\alpha_k\lambda^k,
+\]
+where the softmax coefficients keep the response as a convex combination of
+adjacency powers.  The residual branch applies
+\[
+  p_H(\lambda)=\sum_{k=1}^{K}\beta_k(\lambda^{k-1}-\lambda^k)
+  =(1-\lambda)\sum_{k=1}^{K}\beta_k\lambda^{k-1}.
+\]
+Thus the residual response is exactly zero on the constant eigencomponent
+$\lambda=1$ and increases on components that are attenuated by repeated
+smoothing.  This is the sense in which the HARP branch is high-pass: it is not
+an unconstrained extra MLP, but a finite-difference complement to a smoothing
+polynomial.
+
+This interpretation also clarifies why branch identity matters.  The
+self-loop expert measures residuals relative to a propagation operator that
+always carries ego information.  The ego-separated expert instead propagates
+with a no-self operator and concatenates the original ego state only at the
+readout.  Consequently, the two branches are not merely different
+parameterizations of the same filter.  They encode different assumptions about
+whether self information should be mixed into every propagation step or kept
+as a separate reference signal.
+
+\paragraph{Selector calibration caveat.}
+The main-paper threshold uses a normal-approximation standard error for two
+validation accuracies.  The validation predictions are paired on the same
+nodes, so the independence approximation is not exact.  We intentionally use
+this simple threshold as a conservative branch-switching rule rather than as a
+formal hypothesis test.  All paired significance claims in the paper are made
+on held-out test split results, not on the validation routing statistic.
+
 \section{Extended Main Tables}
 
 \subsection{HARP-Select Summary}
@@ -165,13 +202,13 @@ stress test: removing ego/self information is consistently harmful.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.78\textwidth]{figures/harp_select_framework.png}
+\includegraphics[width=\textwidth]{figures/harp_select_framework.png}
 \caption{\method{} trains two experts, records validation evidence, and freezes the branch decision before test evaluation.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.78\textwidth]{figures/harp_framework.png}
+\includegraphics[width=0.84\textwidth]{figures/harp_framework.png}
 \caption{Internal residual polynomial block used by the self-loop expert.}
 \end{figure}
 

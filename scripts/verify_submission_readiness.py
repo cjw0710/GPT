@@ -206,6 +206,10 @@ def check_supplementary_material() -> list[str]:
         "Supplementary Material for" in tex,
         "Supplementary material should have an explicit title",
     )
+    _require(
+        "Filter-Response Interpretation" in tex and "p_H(\\lambda)" in tex,
+        "Supplementary material should retain the residual filter-response derivation",
+    )
     page_count = _latest_page_count_from_log(PAPER / "supplementary_material.log")
     _require(
         page_count >= MIN_SUPPLEMENTARY_PAGES,

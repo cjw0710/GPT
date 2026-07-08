@@ -33,3 +33,4 @@ paper/*.pdf
 !paper/ReproducibilityChecklist_HARP_GNN.pdf
 paper/*.zip
 paper/HARP_GNN_AAAI2027_official_page*.png
+paper/HARP_GNN_AAAI2027_supplement_page*.png

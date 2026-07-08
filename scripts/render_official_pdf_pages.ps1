@@ -38,12 +38,17 @@ $SearchPath = @(
     (Join-Path $GhostscriptBase "kanji")
 ) -join ";"
 
-Get-ChildItem -LiteralPath $ResolvedPaperDir -Filter "HARP_GNN_AAAI2027_official_page*.png" -File |
+$OutputWildcard = [System.IO.Path]::GetFileName($OutputPattern) -replace "%d", "*"
+if ([string]::IsNullOrWhiteSpace($OutputWildcard) -or $OutputWildcard -eq "*") {
+    throw "Refusing to use unsafe output wildcard for page previews."
+}
+
+Get-ChildItem -LiteralPath $ResolvedPaperDir -Filter $OutputWildcard -File |
     Remove-Item -Force
 
 & $Ghostscript "-I$SearchPath" -q -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m "-r$Resolution" "-sOutputFile=$OutputPattern" $PdfPath
 
-$Generated = Get-ChildItem -LiteralPath $ResolvedPaperDir -Filter "HARP_GNN_AAAI2027_official_page*.png" -File |
+$Generated = Get-ChildItem -LiteralPath $ResolvedPaperDir -Filter $OutputWildcard -File |
     Sort-Object Name
 
 if (-not $Generated) {
