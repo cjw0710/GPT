@@ -199,6 +199,7 @@ External fixed-rule validation on the ICLR 2023 critical-heterophily benchmark:
 External interpretation: Roman-Empire provides the first significant positive branch result: HARP-ESep wins all 10 splits, and the frozen selector routes all 10 splits to it (Holm-adjusted exact sign-flip p=0.0039).
 Amazon-Ratings shows the conservative boundary: HARP-ESep has a small non-significant mean advantage, but no split exceeds the fixed confidence threshold, so HARP-Select retains HARP-GNN and incurs modest oracle regret.
 The candidate now has external validation, but still lacks strong official-code baselines on Roman-Empire/Amazon-Ratings. A local FAGCN-style smoke scaffold is present for implementation development, but it is not treated as official-code evidence. The binary ROC-AUC path is implemented for branch comparisons, while selector calibration for ROC-AUC datasets remains future work.
+FAGCN-style external smoke results are short-run implementation checks only (amazon-ratings: 37.33, roman-empire: 61.61); they are not part of the reported external baseline comparison.
 
 ## Binary Critical-Heterophily ROC-AUC
 

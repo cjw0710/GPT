@@ -239,7 +239,8 @@ class FAGCNStyle(nn.Module):
             size=adj.shape,
             dtype=h.dtype,
             device=h.device,
-        ).coalesce()
+            is_coalesced=True,
+        )
         out = spmm(signed_adj, h)
         return out, edge_gate
 

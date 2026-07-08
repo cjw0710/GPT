@@ -5,6 +5,7 @@ configs\cora.yaml,results\cora.csv,complete,15,15,0,0,0
 configs\critical_heterophily_baselines.yaml,results\critical_heterophily_baselines.csv,complete,160,160,0,0,0
 configs\critical_heterophily_binary_harp.yaml,results\critical_heterophily_binary_harp.csv,complete,40,40,0,0,0
 configs\critical_heterophily_binary_smoke.yaml,results\critical_heterophily_binary_smoke.csv,complete,6,6,0,0,0
+configs\critical_heterophily_fagcn_style_smoke.yaml,results\critical_heterophily_fagcn_style_smoke.csv,complete,2,2,0,0,0
 configs\critical_heterophily_harp.yaml,results\critical_heterophily_harp.csv,complete,40,40,0,0,0
 configs\critical_heterophily_smoke.yaml,results\critical_heterophily_smoke.csv,complete,4,4,0,0,0
 configs\geom_gcn_harp_esep.yaml,results\geom_gcn_harp_esep.csv,complete,30,30,0,0,0

@@ -413,6 +413,7 @@ def _optional_harp_select_section() -> list[str]:
     cost_path = ROOT / "results" / "harp_select_training_cost.csv"
     external_paired_path = ROOT / "results" / "critical_heterophily_harp_esep_paired_tests.csv"
     external_robust_path = ROOT / "results" / "critical_heterophily_harp_esep_robust_tests.csv"
+    fagcn_smoke_path = ROOT / "results" / "critical_heterophily_fagcn_style_smoke.csv"
     if not diagnostics_path.exists() or not paired_path.exists():
         return []
 
@@ -554,9 +555,18 @@ def _optional_harp_select_section() -> list[str]:
                 ),
                 "Amazon-Ratings shows the conservative boundary: HARP-ESep has a small non-significant mean advantage, but no split exceeds the fixed confidence threshold, so HARP-Select retains HARP-GNN and incurs modest oracle regret.",
                 "The candidate now has external validation, but still lacks strong official-code baselines on Roman-Empire/Amazon-Ratings. A local FAGCN-style smoke scaffold is present for implementation development, but it is not treated as official-code evidence. The binary ROC-AUC path is implemented for branch comparisons, while selector calibration for ROC-AUC datasets remains future work.",
-                "",
             ]
         )
+        if fagcn_smoke_path.exists():
+            smoke = pd.read_csv(fagcn_smoke_path)
+            smoke_rows = ", ".join(
+                f"{row.dataset}: {100.0 * float(row.test_acc):.2f}"
+                for row in smoke.sort_values("dataset").itertuples(index=False)
+            )
+            lines.append(
+                f"FAGCN-style external smoke results are short-run implementation checks only ({smoke_rows}); they are not part of the reported external baseline comparison."
+            )
+        lines.append("")
     return lines
 
 

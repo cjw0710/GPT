@@ -32,7 +32,7 @@ heterophily architecture.
 - Safe: Roman-Empire gives significant positive branch evidence for HARP-ESep and the frozen selector routes all splits to it.
 - Safe: Minesweeper and Tolokers show opposite ROC-AUC branch preferences, supporting branch specialization rather than a universal no-self claim.
 - Safe: the deferred Questions full-run config is a reproducibility recipe, not reported evidence.
-- Safe: FAGCN-style smoke results show that the local signed-edge baseline scaffold runs; they do not close the official-code baseline gap.
+- Safe: FAGCN-style WebKB and external smoke results show that the local signed-edge baseline scaffold runs; they do not close the official-code baseline gap.
 - Unsafe: state-of-the-art performance.
 - Unsafe: broad superiority over heterophily baselines.
 - Unsafe: ROC-AUC HARP-Select routing claims before metric-specific calibration.
