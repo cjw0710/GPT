@@ -565,6 +565,7 @@ def _optional_binary_critical_section() -> list[str]:
     paired_path = ROOT / "results" / "critical_heterophily_binary_complete_paired_tests.csv"
     robust_path = ROOT / "results" / "critical_heterophily_binary_complete_robust_tests.csv"
     smoke_path = ROOT / "results" / "critical_heterophily_binary_smoke.csv"
+    deferred_questions_path = ROOT / "configs" / "deferred" / "critical_heterophily_binary_questions.yaml"
     if not result_path.exists() or not paired_path.exists() or not robust_path.exists():
         return []
 
@@ -629,6 +630,10 @@ def _optional_binary_critical_section() -> list[str]:
                 f"The smoke file covers {smoke_datasets} with one split per branch and is treated as loader/protocol evidence only.",
             ]
         )
+    if deferred_questions_path.exists():
+        lines.append(
+            "A deferred full-run Questions recipe is included under configs/deferred/ for transparency, but it is outside the reported-result audit until the corresponding ROC-AUC CSV is complete."
+        )
     coverage = df.groupby("dataset")["seed"].nunique().sort_index().to_dict()
     coverage_text = ", ".join(f"{dataset}: {count} seeds" for dataset, count in coverage.items())
     lines.append(f"The full binary branch trace currently contains {len(df)} rows ({coverage_text}).")
@@ -666,7 +671,7 @@ def _top_conference_risk_register(
         "| P0 | Competitive evidence below main-track bar | No significant positive paired margins; significant deficits on Chameleon and Squirrel | Either improve the method or re-scope the contribution to a narrower, explicitly diagnostic claim |",
         "| P0 | Baseline coverage is incomplete for a heterophily paper | Implemented baselines omit official-code FAGCN, BernNet, and newer 2025--2026 heterophily methods | Add license-compatible official or carefully reproduced baselines, with the same fixed splits and audit rows |",
         "| P0 | External strong-baseline coverage is incomplete | Roman-Empire and Amazon-Ratings include the implemented non-HARP suite, but still omit official-code FAGCN, BernNet, and newer 2025--2026 baselines | Add license-compatible official or carefully reproduced newer baselines on the external datasets before making broad competitiveness claims |",
-        "| P1 | Binary critical-heterophily selector calibration is incomplete | ROC-AUC support and complete Minesweeper/Tolokers branch comparisons are present, but Questions remains smoke-only and no ROC-AUC-specific selector exists | Finish Questions if claiming the full binary suite, and add a ROC-AUC-specific calibration before applying HARP-Select to binary datasets |",
+        "| P1 | Binary critical-heterophily selector calibration is incomplete | ROC-AUC support and complete Minesweeper/Tolokers branch comparisons are present; Questions remains smoke-only, with a deferred full-run recipe included outside the reported-result audit | Finish Questions if claiming the full binary suite, and add a ROC-AUC-specific calibration before applying HARP-Select to binary datasets |",
         "| P1 | Homophily fallback is weak | Synthetic high-homophily and Planetoid checks favor low-pass or simplified propagation baselines | Add an adaptive low-pass fallback, regularizer, or dataset-level branch prior and re-run Planetoid/synthetic checks |",
         "| P1 | Gate signal claim is fragile | HARP-NoSignal is close to the full model and better on Cornell | Treat local feature variation as a hypothesis, or redesign the gate around learned branch representations |",
         "| P1 | Statistical support remains thin | Bootstrap intervals, Wilcoxon tests, exact sign-flip tests, Holm correction, and fixed-threshold sensitivity are available for HARP-Select, but each dataset still has only 10 fixed splits and no significant positive margin | Add external datasets, more repeated seeds where valid, and keep the sensitivity diagnostic synchronized with regenerated selector outputs |",

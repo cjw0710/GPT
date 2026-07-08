@@ -19,7 +19,7 @@ heterophily architecture.
 | Selector may be hidden test-time model selection | Main paper states the rule uses validation labels only; supplement logs the margin, threshold, selected branch, oracle branch, and regret. | The normal-approximation threshold is heuristic and accuracy-specific. | Point to fixed threshold, split-level logs, no test-label access, and the explicit caveat that ROC-AUC datasets are branch evidence only. |
 | Evidence is mixed and not broadly superior | Main paper and scientific audit explicitly avoid state-of-the-art claims; robust tests show no significant positive row on the original six datasets. | AAAI reviewers may still expect stronger wins. | Reframe the result as removing the significant Chameleon/Squirrel deficits while exposing where expert routing fails. |
 | Baselines are not complete enough | Implemented baselines include MLP, GCN, SGC, APPNP, MixHop, GPR-GNN, H2GCN-style, and LINKX. | Official-code FAGCN, BernNet, and newer 2025--2026 heterophily baselines remain missing. | Acknowledge this as the main limitation; avoid leaderboard language; present Roman-Empire as branch evidence against the implemented suite only. |
-| Binary critical-heterophily treatment is confusing | Main paper reports complete Minesweeper and Tolokers branch comparisons under ROC-AUC; Questions remains smoke-only. | The selector is not calibrated for ROC-AUC, so binary rows cannot be HARP-Select routing claims. | State that Minesweeper/Tolokers demonstrate branch specialization in opposite directions and motivate metric-specific routing, not a selector claim. |
+| Binary critical-heterophily treatment is confusing | Main paper reports complete Minesweeper and Tolokers branch comparisons under ROC-AUC; Questions remains smoke-only, with a deferred full-run recipe under `configs/deferred/`. | The selector is not calibrated for ROC-AUC, so binary rows cannot be HARP-Select routing claims. | State that Minesweeper/Tolokers demonstrate branch specialization in opposite directions and motivate metric-specific routing, not a selector claim. |
 | Framework figure may look like a pipeline rather than a method | Figure 1 shows parallel expert training, validation evidence, frozen routing, and locked test readout. | Some reviewers may want an algorithm box or pseudocode. | Supplement includes the algorithmic rule; a rebuttal can restate the four-step procedure and point to logged CSV columns. |
 | Runtime doubles because both experts are trained | Main paper reports two-expert CPU cost and says this is not an efficiency claim. | Deployment-minded reviewers may dislike the cost. | Argue the artifact targets auditability; distillation/shared encoders are a natural extension, not hidden in current claims. |
 | Gate signal may be weak | Ablations show HARP-NoSignal is close and sometimes better, so the paper treats feature variation as a bounded hypothesis. | The handcrafted signal may not be publishable as a central novelty. | Keep the central claim on residual branch specialization and routing, not on the handcrafted gate. |
@@ -31,6 +31,7 @@ heterophily architecture.
 - Safe: HARP-Select removes the original significant Chameleon/Squirrel deficits by routing to HARP-ESep on those splits.
 - Safe: Roman-Empire gives significant positive branch evidence for HARP-ESep and the frozen selector routes all splits to it.
 - Safe: Minesweeper and Tolokers show opposite ROC-AUC branch preferences, supporting branch specialization rather than a universal no-self claim.
+- Safe: the deferred Questions full-run config is a reproducibility recipe, not reported evidence.
 - Unsafe: state-of-the-art performance.
 - Unsafe: broad superiority over heterophily baselines.
 - Unsafe: ROC-AUC HARP-Select routing claims before metric-specific calibration.
@@ -53,4 +54,3 @@ Priority additions, in order:
 2. One sentence connecting \(p_H(\lambda)\) to the supplement's filter-response derivation.
 3. A compact note that Tolokers reverses Minesweeper, making branch specialization the core message.
 4. A stronger explicit limitation that missing official-code 2025--2026 baselines preclude leaderboard claims.
-
