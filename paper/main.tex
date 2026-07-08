@@ -143,6 +143,11 @@ The branches are mixed with learned polynomial weights:
 \end{equation}
 The residual branch uses differences between consecutive propagation orders.
 Thus $H_1=X-\hat{A}X$ directly captures the local contrast that ordinary averaging removes.
+In the eigenbasis of $\hat{A}$, the low-pass response is a nonnegative polynomial
+$p_L(\lambda)=\sum_k \alpha_k\lambda^k$, while the residual branch has response
+$p_H(\lambda)=(1-\lambda)\sum_{k=1}^{K}\beta_k\lambda^{k-1}$.
+The high-pass response therefore vanishes on the constant component $\lambda=1$ and concentrates capacity on deviations that smoothing suppresses.
+This gives a simple diagnostic axis: the model is not only adding parameters, but explicitly comparing a smoothing polynomial with its finite-difference complement.
 
 To fuse the branches locally, \base{} computes a label-free feature-variation statistic
 \begin{equation}
@@ -232,7 +237,7 @@ We evaluate WebKB Texas, Wisconsin, and Cornell; larger Geom-GCN Actor, Chameleo
 The first six datasets use the standard 10 fixed Geom-GCN splits \cite{pei2020geomgcn}.
 Roman-Empire and Amazon-Ratings use the fixed masks supplied by the critical-heterophily benchmark suite \cite{platonov2023critical}.
 Table~\ref{tab:critical-data} reports the external graph sizes and split statistics used in the external evaluation.
-For the binary critical-heterophily suite, we implement ROC-AUC support and report the complete 10-split Minesweeper branch comparison; Tolokers and Questions are included only as loader and metric sanity checks and are excluded from the main empirical claims.
+For the binary critical-heterophily suite, we implement ROC-AUC support and report complete 10-split Minesweeper and Tolokers branch comparisons; Questions remains a loader and metric sanity check and is excluded from the main empirical claims.
 
 \begin{table}[t]
 \centering
@@ -571,21 +576,10 @@ The self-loop expert is useful on WebKB-style graphs, the ego-separated no-self 
 The evidence is deliberately bounded: it supports an auditable specialist-and-routing formulation rather than a universal heterophily leaderboard result.
 This boundedness is useful because it identifies the next scientific tests: stronger official baselines, the remaining ROC-AUC critical datasets, and cheaper deployable selectors.
 The broader methodological lesson is that heterophily mechanisms should be evaluated with the same visibility as their accuracy numbers.
-When a model changes the role of self-loops, high-pass residuals, gates, or branch selectors, the paper should show how that choice was made and where it fails.
+When a model changes the role of self-loops, high-pass residuals, gates, or branch selectors, the paper should show how that choice was made before test evaluation and where the same choice fails.
 \method{} follows this discipline by turning branch selection into a recorded decision rule rather than an implicit hyperparameter.
-The same discipline makes the result easier to falsify, extend, and compare against stronger baselines.
-
-The most valuable additions are not cosmetic model complexity.
-They are tighter external validation, stronger license-compatible baselines, and a cheaper selector that keeps the same auditability.
-If those additions preserve the current pattern on Roman-Empire, Minesweeper, and the WebKB datasets while reducing the deficits on Chameleon and Squirrel, the work would support a stronger claim about branch-aware residual filtering.
-If they do not, the same framework will still identify which structural assumption failed.
-Either outcome is useful: the contribution is a reproducible way to ask whether a heterophilous graph needs self-preserving smoothing, ego-separated contrast, or neither.
-This framing also makes the paper easier to build on.
-New datasets can be added by logging the same validation quantities; new experts can be added by comparing their frozen branch regret; and new gates can be evaluated by whether they improve calibration as well as mean accuracy.
-The resulting standard is modest but demanding.
-A branch-aware graph model should not only fit labels on a benchmark.
-It should explain which structural evidence it trusted, why that trust was justified before seeing the test labels, and where the same trust breaks down.
-\method{} is a first step toward that standard for residual polynomial GNNs.
+New datasets, experts, and learned gates can be added under the same audit trail by reporting validation margins, thresholds, selected branches, oracle regret, and final paired evidence.
+Under that standard, a branch-aware graph model should not only fit labels on a benchmark; it should explain which structural evidence it trusted and why that trust was justified before seeing the test labels.
 
 \clearpage
 \typeout{HARP_REFERENCES_START_PAGE=\thepage}

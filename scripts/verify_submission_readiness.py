@@ -19,8 +19,11 @@ SUBMISSION_ZIP = PAPER / "HARP_GNN_AAAI2027_submission_package.zip"
 SUPPLEMENTARY_ZIP = PAPER / "HARP_GNN_AAAI2027_supplementary_artifact.zip"
 CHECKLIST_TEX = PAPER / "ReproducibilityChecklist_HARP_GNN.tex"
 CHECKLIST_PDF = PAPER / "ReproducibilityChecklist_HARP_GNN.pdf"
+SUPPLEMENTARY_MATERIAL_TEX = PAPER / "supplementary_material.tex"
+SUPPLEMENTARY_MATERIAL_PDF = PAPER / "HARP_GNN_AAAI2027_supplementary_material.pdf"
 MAIN_TEX = PAPER / "main.tex"
 MAX_TECHNICAL_PAGES = 7
+MIN_SUPPLEMENTARY_PAGES = 4
 PREVIEW_DPI = 150
 LETTER_PREVIEW_SIZE = (1275, 1650)
 
@@ -114,6 +117,8 @@ def check_core_artifacts() -> list[str]:
     _assert_file(SUPPLEMENTARY_ZIP, min_bytes=100_000)
     _assert_file(CHECKLIST_TEX, min_bytes=1000)
     _assert_file(CHECKLIST_PDF, min_bytes=10_000)
+    _assert_file(SUPPLEMENTARY_MATERIAL_TEX, min_bytes=1000)
+    _assert_file(SUPPLEMENTARY_MATERIAL_PDF, min_bytes=100_000)
     return ["primary paper, checklist, and package artifacts exist with plausible sizes"]
 
 
@@ -160,6 +165,7 @@ def check_latex_logs() -> list[str]:
     logs = [
         PAPER / "main.log",
         CHECKLIST_TEX.with_suffix(".log"),
+        PAPER / "supplementary_material.log",
         BUILD / "submission_package" / "validation_source" / "main.log",
     ]
     blocking_patterns = [
@@ -190,6 +196,22 @@ def check_latex_logs() -> list[str]:
 
     _require(not problems, "Blocking LaTeX log messages found:\n" + "\n".join(problems))
     return [f"LaTeX logs have no blocking warnings/errors; underfull messages only ({underfull_count})"]
+
+
+def check_supplementary_material() -> list[str]:
+    tex = _read_text(SUPPLEMENTARY_MATERIAL_TEX)
+    _require("Anonymous Authors" in tex, "Supplementary material should remain anonymized")
+    _require("github.com" not in tex.lower(), "Supplementary material must not cite a mutable GitHub URL")
+    _require(
+        "Supplementary Material for" in tex,
+        "Supplementary material should have an explicit title",
+    )
+    page_count = _latest_page_count_from_log(PAPER / "supplementary_material.log")
+    _require(
+        page_count >= MIN_SUPPLEMENTARY_PAGES,
+        f"Supplementary material has only {page_count} pages; expected at least {MIN_SUPPLEMENTARY_PAGES}",
+    )
+    return [f"supplementary material PDF compiles and remains anonymous ({page_count} pages)"]
 
 
 def check_pdf_previews() -> list[str]:
@@ -317,6 +339,8 @@ def check_supplementary_zip() -> list[str]:
 
     required = {
         root + "README.md",
+        root + "LICENSE",
+        root + "ANONYMITY_AND_RELEASE.md",
         root + "requirements.txt",
         root + "SUPPLEMENTARY_ARTIFACT_README.md",
         root + "src/harp_gnn/models.py",
@@ -326,6 +350,7 @@ def check_supplementary_zip() -> list[str]:
         root + "scripts/verify_reported_results.py",
         root + "scripts/verify_submission_readiness.py",
         root + "scripts/verify_top_conference_claims.py",
+        root + "scripts/compile_supplementary_material.ps1",
         root + "scripts/generate_scientific_audit.py",
         root + "scripts/merge_harp_esep_results.py",
         root + "scripts/plot_framework.py",
@@ -344,6 +369,7 @@ def check_supplementary_zip() -> list[str]:
         root + "results/harp_select_training_cost.csv",
         root + "results/harp_select_training_cost_per_split.csv",
         root + "paper/main.tex",
+        root + "paper/supplementary_material.tex",
         root + "paper/AAAI27_SUBMISSION_REQUIREMENTS.md",
         root + "paper/references_additions.bib",
         root + "paper/SCIENTIFIC_AUDIT.md",
@@ -358,6 +384,7 @@ def check_supplementary_zip() -> list[str]:
         root + "paper/figures/harp_framework.png",
         root + "paper/figures/harp_select_framework.png",
         root + "paper/HARP_GNN_AAAI2027_official_compile.pdf",
+        root + "paper/HARP_GNN_AAAI2027_supplementary_material.pdf",
         root + "paper/ReproducibilityChecklist_HARP_GNN.pdf",
     }
     name_set = set(names)
@@ -384,6 +411,16 @@ def check_supplementary_zip() -> list[str]:
         == _read_bytes(OFFICIAL_PDF),
         "Supplementary artifact PDF is stale relative to the current official PDF",
     )
+    _require(
+        _zip_read(SUPPLEMENTARY_ZIP, root + "paper/supplementary_material.tex")
+        == _read_bytes(SUPPLEMENTARY_MATERIAL_TEX),
+        "Supplementary artifact supplementary_material.tex is stale relative to paper/supplementary_material.tex",
+    )
+    _require(
+        _zip_read(SUPPLEMENTARY_ZIP, root + "paper/HARP_GNN_AAAI2027_supplementary_material.pdf")
+        == _read_bytes(SUPPLEMENTARY_MATERIAL_PDF),
+        "Supplementary artifact supplementary material PDF is stale relative to the current supplementary PDF",
+    )
     return [f"supplementary artifact zip is clean and synchronized ({len(names)} members)"]
 
 
@@ -392,6 +429,7 @@ def run_checks() -> list[str]:
     messages.extend(check_core_artifacts())
     messages.extend(check_manuscript_source())
     messages.extend(check_latex_logs())
+    messages.extend(check_supplementary_material())
     messages.extend(check_pdf_previews())
     messages.extend(check_pdf_font_format())
     messages.extend(check_checklist())
