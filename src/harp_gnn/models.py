@@ -188,6 +188,113 @@ class GPRGNN(nn.Module):
         return out
 
 
+class FAGCNStyle(nn.Module):
+    """Sparse frequency-adaptive GCN-style baseline.
+
+    This implementation follows the FAGCN idea of signed, edge-conditioned
+    propagation weights, but is intentionally kept as an in-repository baseline
+    scaffold rather than an official-code reproduction.
+    """
+
+    use_no_self_adj = True
+
+    def __init__(
+        self,
+        in_dim: int,
+        hidden_dim: int,
+        out_dim: int,
+        dropout: float = 0.5,
+        layers: int = 2,
+        epsilon: float = 0.3,
+        negative_slope: float = 0.2,
+        use_layer_norm: bool = True,
+    ):
+        super().__init__()
+        if layers < 1:
+            raise ValueError("FAGCN-style baseline requires at least one propagation layer")
+        self.dropout = dropout
+        self.layers = layers
+        self.epsilon = epsilon
+        self.negative_slope = negative_slope
+        self.encoder = nn.Linear(in_dim, hidden_dim)
+        self.attn_src = nn.ModuleList(nn.Linear(hidden_dim, 1, bias=False) for _ in range(layers))
+        self.attn_dst = nn.ModuleList(nn.Linear(hidden_dim, 1, bias=False) for _ in range(layers))
+        self.norms = nn.ModuleList(
+            nn.LayerNorm(hidden_dim) if use_layer_norm else nn.Identity() for _ in range(layers)
+        )
+        self.classifier = nn.Linear(hidden_dim, out_dim)
+
+    def _signed_message(self, h: torch.Tensor, adj: torch.Tensor, layer: int) -> tuple[torch.Tensor, torch.Tensor]:
+        adj = adj.coalesce()
+        row, col = adj.indices()
+        values = adj.values()
+        src_score = self.attn_src[layer](h).squeeze(-1)
+        dst_score = self.attn_dst[layer](h).squeeze(-1)
+        edge_gate = torch.tanh(
+            F.leaky_relu(src_score[row] + dst_score[col], negative_slope=self.negative_slope)
+        )
+        signed_adj = torch.sparse_coo_tensor(
+            adj.indices(),
+            values * edge_gate,
+            size=adj.shape,
+            dtype=h.dtype,
+            device=h.device,
+        ).coalesce()
+        out = spmm(signed_adj, h)
+        return out, edge_gate
+
+    def _hidden(
+        self,
+        x: torch.Tensor,
+        adj: torch.Tensor,
+        collect_gates: bool = False,
+    ) -> tuple[torch.Tensor, list[torch.Tensor]]:
+        h = F.relu(self.encoder(F.dropout(x, p=self.dropout, training=self.training)))
+        gates: list[torch.Tensor] = []
+        for layer in range(self.layers):
+            propagated, edge_gate = self._signed_message(
+                F.dropout(h, p=self.dropout, training=self.training),
+                adj,
+                layer,
+            )
+            if collect_gates:
+                gates.append(edge_gate.detach())
+            h = self.epsilon * h + propagated
+            h = self.norms[layer](F.relu(h))
+        return h, gates
+
+    def forward(self, x: torch.Tensor, adj: torch.Tensor, gate_signal: torch.Tensor | None = None) -> torch.Tensor:
+        h, _ = self._hidden(x, adj, collect_gates=False)
+        h = F.dropout(h, p=self.dropout, training=self.training)
+        return self.classifier(h)
+
+    def diagnostics(
+        self,
+        x: torch.Tensor,
+        adj: torch.Tensor,
+        gate_signal: torch.Tensor | None = None,
+    ) -> Dict[str, float]:
+        was_training = self.training
+        self.eval()
+        try:
+            with torch.no_grad():
+                _, gates = self._hidden(x, adj, collect_gates=True)
+                values = torch.cat(gates) if gates else torch.empty(0, dtype=x.dtype, device=x.device)
+                if values.numel() == 0:
+                    return {}
+                return {
+                    "fagcn_edge_gate_mean": float(values.mean().item()),
+                    "fagcn_edge_gate_abs_mean": float(values.abs().mean().item()),
+                    "fagcn_edge_gate_positive_frac": float((values > 0).float().mean().item()),
+                    "fagcn_edge_gate_min": float(values.min().item()),
+                    "fagcn_edge_gate_max": float(values.max().item()),
+                    "fagcn_layers": float(self.layers),
+                    "fagcn_epsilon": float(self.epsilon),
+                }
+        finally:
+            self.train(was_training)
+
+
 class LINKX(nn.Module):
     """Sparse-friendly LINKX-style feature and adjacency encoder."""
 
@@ -1113,6 +1220,17 @@ def build_model(name: str, in_dim: int, out_dim: int, params: Dict[str, Any], nu
             hops=int(params.get("hops", 10)),
             alpha=float(params.get("alpha", 0.1)),
             init=str(params.get("init", "ppr")),
+        )
+    if name in {"fagcn", "fagcn_style", "fa_gcn", "fa-gcn"}:
+        return FAGCNStyle(
+            in_dim,
+            hidden_dim,
+            out_dim,
+            dropout=dropout,
+            layers=int(params.get("layers", 2)),
+            epsilon=float(params.get("epsilon", 0.3)),
+            negative_slope=float(params.get("negative_slope", 0.2)),
+            use_layer_norm=bool(params.get("use_layer_norm", True)),
         )
     if name == "linkx":
         if num_nodes is None:

@@ -18,6 +18,7 @@ configs\smoke.yaml,results\smoke.csv,complete,3,3,0,0,0
 configs\synthetic_sweep.yaml,results\synthetic_sweep.csv,complete,45,45,0,0,0
 configs\webkb.yaml,results\webkb.csv,complete,270,270,0,0,0
 configs\webkb_ablation.yaml,results\webkb_ablation.csv,complete,150,150,0,0,0
+configs\webkb_fagcn_style_smoke.yaml,results\webkb_fagcn_style_smoke.csv,complete,3,3,0,0,0
 configs\webkb_gate_variants.yaml,results\webkb_gate_variants.csv,complete,120,120,0,0,0
 configs\webkb_h2gcn.yaml,results\webkb_h2gcn.csv,complete,30,30,0,0,0
 configs\webkb_h2gcn_smoke.yaml,results\webkb_h2gcn_smoke.csv,complete,1,1,0,0,0

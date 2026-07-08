@@ -10,6 +10,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.harp_gnn.models import (  # noqa: E402
+    FAGCNStyle,
     HARPAdaptive,
     HARPEgoSep,
     HARPGNN,
@@ -159,6 +160,39 @@ def verify_fixed_feature_caches(adj: torch.Tensor) -> None:
     for power in mixhop.powers:
         _assert_close(f"MixHop cached A^{power} X", cached_bases[power], manual[power], atol=1e-6)
     print("[ok] SGC and MixHop fixed-feature propagation caches are stable and numerically correct.")
+
+
+def verify_fagcn_style(adj: torch.Tensor) -> None:
+    torch.manual_seed(37)
+    no_self_adj = sparse_mx_to_torch_sparse(
+        normalize_adj(_toy_adjacency(), add_self_loops=False),
+        device=torch.device("cpu"),
+    )
+    x = torch.randn((adj.shape[0], 5), dtype=torch.float32)
+    model = FAGCNStyle(
+        in_dim=x.shape[1],
+        hidden_dim=7,
+        out_dim=3,
+        dropout=0.0,
+        layers=2,
+        epsilon=0.3,
+        use_layer_norm=True,
+    )
+    if not getattr(model, "use_no_self_adj", False):
+        raise AssertionError("FAGCN-style baseline should request the no-self adjacency")
+    model.eval()
+    with torch.no_grad():
+        logits = model(x, no_self_adj)
+    if logits.shape != (adj.shape[0], 3):
+        raise AssertionError(f"FAGCN-style logits shape mismatch: {tuple(logits.shape)}")
+    diagnostics = model.diagnostics(x, no_self_adj)
+    if not -1.0 <= diagnostics.get("fagcn_edge_gate_mean", 2.0) <= 1.0:
+        raise AssertionError("FAGCN-style edge gate mean is outside the signed gate range")
+    if diagnostics.get("fagcn_edge_gate_abs_mean", 0.0) <= 0.0:
+        raise AssertionError("FAGCN-style diagnostics did not expose nonzero signed edge gates")
+    if diagnostics.get("fagcn_layers") != 2.0:
+        raise AssertionError("FAGCN-style diagnostics did not expose the layer count")
+    print("[ok] FAGCN-style signed propagation baseline is stable on toy graphs.")
 
 
 def verify_harpx_projected_equivalence(adj: torch.Tensor) -> None:
@@ -438,6 +472,7 @@ def main() -> None:
     adj = verify_sparse_conversion()
     verify_harp_projected_equivalence(adj)
     verify_fixed_feature_caches(adj)
+    verify_fagcn_style(adj)
     verify_harpx_projected_equivalence(adj)
     verify_harp_struct_gate_projected_equivalence(adj)
     verify_harp_ego_sep(adj)

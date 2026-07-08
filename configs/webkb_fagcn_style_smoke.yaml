@@ -1,0 +1,33 @@
+output: results/webkb_fagcn_style_smoke.csv
+data_root: data
+device: auto
+seeds: [0]
+
+training:
+  epochs: 80
+  patience: 20
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: texas
+    type: geom_gcn
+    dataset: texas
+    make_undirected: true
+  - name: wisconsin
+    type: geom_gcn
+    dataset: wisconsin
+    make_undirected: true
+  - name: cornell
+    type: geom_gcn
+    dataset: cornell
+    make_undirected: true
+
+models:
+  - name: fagcn
+    params:
+      layers: 2
+      epsilon: 0.3
+      use_layer_norm: true

@@ -1,0 +1,30 @@
+# Deferred full-run recipe for the in-repository FAGCN-style baseline.
+# This is not an official-code FAGCN reproduction and should not be cited as
+# closing the official-baseline gap until validated against the authors' code.
+output: results/critical_heterophily_fagcn_style.csv
+data_root: data
+device: auto
+seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+training:
+  epochs: 250
+  patience: 60
+  hidden_dim: 64
+  dropout: 0.5
+  lr: 0.01
+  weight_decay: 0.0005
+
+datasets:
+  - name: roman-empire
+    type: heterophilous_graphs
+    dataset: roman-empire
+  - name: amazon-ratings
+    type: heterophilous_graphs
+    dataset: amazon-ratings
+
+models:
+  - name: fagcn
+    params:
+      layers: 2
+      epsilon: 0.3
+      use_layer_norm: true

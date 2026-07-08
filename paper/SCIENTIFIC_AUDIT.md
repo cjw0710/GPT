@@ -24,8 +24,8 @@ Evidence trigger: HARP-GNN is best on 2/12 rows, within 1 pp on 1 additional row
 | Priority | Risk | Current evidence | Required action before treating the draft as AAAI-main competitive |
 |---|---|---|---|
 | P0 | Competitive evidence below main-track bar | No significant positive paired margins; significant deficits on Chameleon and Squirrel | Either improve the method or re-scope the contribution to a narrower, explicitly diagnostic claim |
-| P0 | Baseline coverage is incomplete for a heterophily paper | Implemented baselines omit official-code FAGCN, BernNet, and newer 2025--2026 heterophily methods | Add license-compatible official or carefully reproduced baselines, with the same fixed splits and audit rows |
-| P0 | External strong-baseline coverage is incomplete | Roman-Empire and Amazon-Ratings include the implemented non-HARP suite, but still omit official-code FAGCN, BernNet, and newer 2025--2026 baselines | Add license-compatible official or carefully reproduced newer baselines on the external datasets before making broad competitiveness claims |
+| P0 | Baseline coverage is incomplete for a heterophily paper | Reported baselines omit official-code FAGCN, BernNet, and newer 2025--2026 heterophily methods; a local FAGCN-style smoke scaffold exists but is not official-code evidence | Add license-compatible official or carefully reproduced baselines, with the same fixed splits and audit rows |
+| P0 | External strong-baseline coverage is incomplete | Roman-Empire and Amazon-Ratings include the implemented non-HARP suite, but still omit official-code FAGCN, BernNet, and newer 2025--2026 baselines | Validate the FAGCN-style scaffold against official code or add license-compatible official/reproduced newer baselines before making broad competitiveness claims |
 | P1 | Binary critical-heterophily selector calibration is incomplete | ROC-AUC support and complete Minesweeper/Tolokers branch comparisons are present; Questions remains smoke-only, with a deferred full-run recipe included outside the reported-result audit | Finish Questions if claiming the full binary suite, and add a ROC-AUC-specific calibration before applying HARP-Select to binary datasets |
 | P1 | Homophily fallback is weak | Synthetic high-homophily and Planetoid checks favor low-pass or simplified propagation baselines | Add an adaptive low-pass fallback, regularizer, or dataset-level branch prior and re-run Planetoid/synthetic checks |
 | P1 | Gate signal claim is fragile | HARP-NoSignal is close to the full model and better on Cornell | Treat local feature variation as a hypothesis, or redesign the gate around learned branch representations |
@@ -198,7 +198,7 @@ External fixed-rule validation on the ICLR 2023 critical-heterophily benchmark:
 
 External interpretation: Roman-Empire provides the first significant positive branch result: HARP-ESep wins all 10 splits, and the frozen selector routes all 10 splits to it (Holm-adjusted exact sign-flip p=0.0039).
 Amazon-Ratings shows the conservative boundary: HARP-ESep has a small non-significant mean advantage, but no split exceeds the fixed confidence threshold, so HARP-Select retains HARP-GNN and incurs modest oracle regret.
-The candidate now has external validation, but still lacks strong official-code baselines on Roman-Empire/Amazon-Ratings. The binary ROC-AUC path is implemented for branch comparisons, while selector calibration for ROC-AUC datasets remains future work.
+The candidate now has external validation, but still lacks strong official-code baselines on Roman-Empire/Amazon-Ratings. A local FAGCN-style smoke scaffold is present for implementation development, but it is not treated as official-code evidence. The binary ROC-AUC path is implemented for branch comparisons, while selector calibration for ROC-AUC datasets remains future work.
 
 ## Binary Critical-Heterophily ROC-AUC
 
@@ -232,10 +232,11 @@ Claims to avoid:
 - Do not claim speed superiority.
 - Do not present Planetoid as a tuned citation benchmark result.
 - Do not cite Questions as a main binary critical-heterophily result until its full ROC-AUC run is complete.
+- Do not cite the FAGCN-style smoke scaffold as official-code FAGCN evidence.
 
 ## Next Scientific Moves
 
-1. Add strong official-code baselines on Roman-Empire and Amazon-Ratings under the same fixed masks.
+1. Validate the FAGCN-style scaffold against official code, or add license-compatible official-code baselines on Roman-Empire and Amazon-Ratings under the same fixed masks.
 2. Finish Questions under ROC-AUC if claiming the full binary suite, then design a ROC-AUC-specific calibration rule before applying HARP-Select to binary datasets.
 3. Investigate distillation, shared encoders, or early branch screening to reduce the measured two-specialist training cost.
 4. Improve the low-pass fallback so the model does not lose as much on homophilous/citation graphs.
