@@ -48,8 +48,8 @@ def _rounded_box(
     body: str = "",
     facecolor: str,
     edgecolor: str,
-    title_size: float = 7.4,
-    body_size: float = 6.4,
+    title_size: float = 6.6,
+    body_size: float = 6.0,
     linewidth: float = 0.9,
     radius: float = 0.045,
 ) -> None:
@@ -126,7 +126,7 @@ def _stage_header(ax: plt.Axes, x0: float, x1: float, label: str, subtitle: str)
         label.upper(),
         ha="center",
         va="center",
-        fontsize=8.2,
+        fontsize=7.4,
         fontweight="bold",
         color=COLORS["ink"],
     )
@@ -136,7 +136,7 @@ def _stage_header(ax: plt.Axes, x0: float, x1: float, label: str, subtitle: str)
         subtitle,
         ha="center",
         va="center",
-        fontsize=6.9,
+        fontsize=6.3,
         color=COLORS["muted"],
     )
 
@@ -208,7 +208,7 @@ def _filter_bank_card(ax: plt.Axes, x: float, y: float, edge: str) -> None:
         title="filter bank",
         facecolor="#ffffff",
         edgecolor=edge,
-        title_size=6.5,
+        title_size=5.8,
     )
     _tiny_filter(ax, x + 0.17, y + 0.15, 0.43, 0.28, mode="low")
     _tiny_filter(ax, x + 0.81, y + 0.15, 0.43, 0.28, mode="residual")
@@ -227,8 +227,8 @@ def _gate_card(ax: plt.Axes, x: float, y: float, edge: str) -> None:
         body=r"$g_i$ blends",
         facecolor="#ffffff",
         edgecolor=edge,
-        title_size=6.5,
-        body_size=5.9,
+        title_size=5.8,
+        body_size=5.6,
     )
     ax.add_patch(Rectangle((x + 0.23, y + 0.13), 0.76, 0.07, facecolor="#e5e7eb", edgecolor="#c7ced6", linewidth=0.35, zorder=5))
     ax.add_patch(Rectangle((x + 0.23, y + 0.13), 0.45, 0.07, facecolor=edge, edgecolor="none", zorder=6))
@@ -246,8 +246,8 @@ def _score_card(ax: plt.Axes, x: float, y: float, label: str, score: str, edge: 
         body=score + "\nval score",
         facecolor="#ffffff",
         edgecolor=edge,
-        title_size=6.2,
-        body_size=5.6,
+        title_size=5.5,
+        body_size=5.4,
     )
 
 
@@ -258,10 +258,10 @@ def _router_card(ax: plt.Axes) -> None:
         1.42,
         2.34,
         2.24,
-        title="Validation evidence router",
+        title="Confidence router",
         facecolor=COLORS["gold_fill"],
         edgecolor=COLORS["gold_edge"],
-        title_size=8.1,
+        title_size=6.8,
         linewidth=1.0,
     )
     ax.text(
@@ -280,7 +280,7 @@ def _router_card(ax: plt.Axes) -> None:
     ax.plot([9.98, 9.98], [2.20, 2.54], color=COLORS["gold_edge"], linewidth=0.85, linestyle=(0, (2, 2)), zorder=6)
     ax.text(9.98, 2.07, r"$1.96SE$", ha="center", va="top", fontsize=5.8, color=COLORS["gold_edge"], zorder=6)
     ax.add_patch(Circle((10.34, 2.37), 0.07, facecolor=COLORS["green_edge"], edgecolor="#ffffff", linewidth=0.45, zorder=7))
-    ax.text(10.03, 1.76, "clear margin selects\notherwise keep safe branch", ha="center", va="center", fontsize=6.25, color=COLORS["ink"], linespacing=1.05, zorder=5)
+    ax.text(10.03, 1.76, "switch only with\nclear validation evidence", ha="center", va="center", fontsize=6.15, color=COLORS["ink"], linespacing=1.05, zorder=5)
     _rounded_box(
         ax,
         9.32,
@@ -288,7 +288,7 @@ def _router_card(ax: plt.Axes) -> None:
         1.50,
         0.46,
         title="",
-        body="rule frozen before test",
+        body="freeze before test",
         facecolor="#ffffff",
         edgecolor=COLORS["gold_edge"],
         body_size=6.0,
@@ -302,12 +302,12 @@ def _locked_card(ax: plt.Axes) -> None:
         1.58,
         1.18,
         1.96,
-        title="Locked branch",
-        body="selected logits\n+ test regret",
+        title="Locked expert",
+        body="test score\n+ oracle regret",
         facecolor=COLORS["purple_fill"],
         edgecolor=COLORS["purple_edge"],
-        title_size=7.7,
-        body_size=6.25,
+        title_size=6.4,
+        body_size=5.9,
     )
     # Simple lock icon.
     ax.add_patch(Rectangle((12.36, 2.80), 0.26, 0.23, facecolor="#ffffff", edgecolor=COLORS["purple_edge"], linewidth=0.75, zorder=6))
@@ -340,16 +340,16 @@ def _locked_card(ax: plt.Axes) -> None:
 def plot_framework(output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(9.20, 3.70), dpi=400)
+    fig, ax = plt.subplots(figsize=(8.40, 3.40), dpi=400)
     ax.set_xlim(0, 13.55)
     ax.set_ylim(0, 5.35)
     ax.axis("off")
 
     stages = [
-        (0.20, 2.05, "fixed split", r"$G,X,Y_{\mathrm{train}},Y_{\mathrm{val}}$"),
-        (2.20, 8.45, "parallel expert training", "same split, same budget"),
-        (8.60, 11.55, "validation routing", "frozen confidence rule"),
-        (11.72, 13.35, "test readout", "after branch lock"),
+        (0.20, 2.05, "data split", r"$G,X,Y_{\mathrm{train}},Y_{\mathrm{val}}$"),
+        (2.20, 8.45, "expert training", "same split, same budget"),
+        (8.60, 11.55, "routing", "validation labels only"),
+        (11.72, 13.35, "test", "after branch lock"),
     ]
     for x0, x1, label, subtitle in stages:
         ax.add_patch(
@@ -375,11 +375,11 @@ def plot_framework(output_path: Path) -> None:
         1.36,
         1.38,
         2.36,
-        title="Input split",
+        title="Fixed split",
         body=r"$G=(V,E),\,X$",
         facecolor="#ffffff",
         edgecolor="#4b5563",
-        title_size=8.2,
+        title_size=6.8,
         body_size=6.8,
     )
     _graph_icon(ax, 1.12, 2.98, scale=0.90)
@@ -387,8 +387,8 @@ def plot_framework(output_path: Path) -> None:
 
     # Expert lanes.
     lane_specs = [
-        (2.43, 2.86, 5.72, 1.34, COLORS["blue_fill"], COLORS["blue_edge"], "Self-loop residual expert"),
-        (2.43, 1.04, 5.72, 1.34, COLORS["green_fill"], COLORS["green_edge"], "Ego-separated no-self expert"),
+        (2.43, 2.86, 5.72, 1.34, COLORS["blue_fill"], COLORS["blue_edge"], "Expert H: self-loop residual"),
+        (2.43, 1.04, 5.72, 1.34, COLORS["green_fill"], COLORS["green_edge"], "Expert E: ego-separated no-self"),
     ]
     for x, y, w, h, face, edge, label in lane_specs:
         ax.add_patch(
@@ -403,7 +403,7 @@ def plot_framework(output_path: Path) -> None:
                 zorder=1,
             )
         )
-        ax.text(x + 0.16, y + h - 0.16, label, ha="left", va="top", fontsize=8.6, fontweight="bold", color=edge, zorder=4)
+        ax.text(x + 0.16, y + h - 0.14, label, ha="left", va="top", fontsize=7.2, fontweight="bold", color=edge, zorder=4)
 
     # Self-loop lane internals.
     _rounded_box(
@@ -415,7 +415,7 @@ def plot_framework(output_path: Path) -> None:
         title="self-loop graph",
         facecolor="#ffffff",
         edgecolor=COLORS["blue_edge"],
-        title_size=6.2,
+        title_size=5.7,
     )
     _graph_icon(ax, 3.28, 3.38, scale=0.36, edgecolor=COLORS["blue_edge"], self_loops=True)
     _filter_bank_card(ax, 4.12, 3.13, COLORS["blue_edge"])
@@ -432,7 +432,7 @@ def plot_framework(output_path: Path) -> None:
         title="ego view",
         facecolor="#ffffff",
         edgecolor=COLORS["green_edge"],
-        title_size=5.9,
+        title_size=5.7,
     )
     _graph_icon(ax, 3.28, 1.56, scale=0.36, edgecolor=COLORS["green_edge"], no_center_fill=True)
     _rounded_box(
@@ -441,7 +441,7 @@ def plot_framework(output_path: Path) -> None:
         1.32,
         1.42,
         0.70,
-        title="no-self propagation",
+        title="no-self filter",
         body=r"$B_k=\tilde A^kB_0$",
         facecolor="#ffffff",
         edgecolor=COLORS["green_edge"],
@@ -454,12 +454,12 @@ def plot_framework(output_path: Path) -> None:
         1.32,
         1.22,
         0.70,
-        title="residual readout",
+        title="residual fusion",
         body=r"$[B_0,U]$",
         facecolor="#ffffff",
         edgecolor=COLORS["green_edge"],
-        title_size=6.0,
-        body_size=6.1,
+        title_size=5.7,
+        body_size=5.8,
     )
     _score_card(ax, 7.06, 1.32, "HARP-ESep", r"$a_E$", COLORS["green_edge"])
 
@@ -488,17 +488,20 @@ def plot_framework(output_path: Path) -> None:
     ax.text(
         5.28,
         4.44,
-        "same split, different graph priors",
+        "identical data split and optimization budget",
         ha="center",
         va="center",
-        fontsize=6.9,
+        fontsize=6.6,
         color=COLORS["muted"],
     )
-    ax.text(10.02, 4.44, "validation selects; test measures", ha="center", va="center", fontsize=6.9, color=COLORS["muted"])
+    ax.text(10.02, 4.44, "route first, evaluate second", ha="center", va="center", fontsize=6.6, color=COLORS["muted"])
 
     fig.savefig(output_path, bbox_inches="tight", pad_inches=0.04)
+    vector_path = output_path.with_suffix(".pdf")
+    fig.savefig(vector_path, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
     print(f"[saved] {output_path}")
+    print(f"[saved] {vector_path}")
 
 
 def main() -> None:

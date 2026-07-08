@@ -45,8 +45,8 @@ def _rounded_box(
     body: str,
     facecolor: str,
     edgecolor: str,
-    title_size: float = 5.55,
-    body_size: float = 5.05,
+    title_size: float = 6.35,
+    body_size: float = 5.70,
     linewidth: float = 0.78,
 ) -> None:
     patch = FancyBboxPatch(
@@ -121,7 +121,7 @@ def _stage_header(ax: plt.Axes, x0: float, x1: float, label: str) -> None:
         label.upper(),
         ha="center",
         va="center",
-        fontsize=5.45,
+        fontsize=5.85,
         fontweight="bold",
         color=COLORS["muted"],
     )
@@ -193,19 +193,19 @@ def _input_box(ax: plt.Axes) -> None:
         "Graph\ninput",
         ha="center",
         va="top",
-        fontsize=5.35,
+        fontsize=6.25,
         fontweight="bold",
         color=COLORS["ink"],
         zorder=3,
     )
-    _graph_icon(ax, 0.90, 2.96, scale=0.70)
+    _graph_icon(ax, 0.90, 2.77, scale=0.64)
     ax.text(
         0.90,
-        2.02,
-        r"$X,\ \hat A$" + "\nfeatures\n+ graph",
+        1.98,
+        r"$X,\ \hat A$" + "\nfeatures, adjacency",
         ha="center",
         va="center",
-        fontsize=5.05,
+        fontsize=4.65,
         color=COLORS["ink"],
         linespacing=1.05,
         zorder=3,
@@ -255,7 +255,7 @@ def plot_framework(output_path: Path) -> None:
         body=r"$L_k=\hat A^kX$",
         facecolor=COLORS["blue_fill"],
         edgecolor=COLORS["blue_edge"],
-        body_size=5.35,
+        body_size=5.55,
     )
     _tiny_filter(ax, 2.24, 3.59, 0.38, 0.30, mode="low")
     _rounded_box(
@@ -265,10 +265,10 @@ def plot_framework(output_path: Path) -> None:
         2.55,
         0.86,
         title="Residual basis",
-        body=r"$H_k=\hat A^{k-1}X-\hat A^kX$",
+        body=r"$H_k=L_{k-1}-L_k$",
         facecolor=COLORS["red_fill"],
         edgecolor=COLORS["red_edge"],
-        body_size=4.85,
+        body_size=5.50,
     )
     _tiny_filter(ax, 2.24, 2.32, 0.36, 0.30, mode="high")
     _rounded_box(
@@ -278,10 +278,10 @@ def plot_framework(output_path: Path) -> None:
         2.55,
         0.86,
         title="Node variation",
-        body=r"$r_i=[\|x_i-\hat A^kx_i\|]_k$",
+        body=r"$r_i=\|x_i-\hat A x_i\|$",
         facecolor=COLORS["green_fill"],
         edgecolor=COLORS["green_edge"],
-        body_size=4.80,
+        body_size=5.25,
     )
     _tiny_filter(ax, 2.24, 1.06, 0.36, 0.30, mode="band")
 
@@ -295,7 +295,7 @@ def plot_framework(output_path: Path) -> None:
         body=r"$Z_L=\sum_k\alpha_k\phi(L_k)$",
         facecolor="#ffffff",
         edgecolor=COLORS["blue_edge"],
-        body_size=4.70,
+        body_size=4.60,
     )
     _rounded_box(
         ax,
@@ -307,7 +307,7 @@ def plot_framework(output_path: Path) -> None:
         body=r"$Z_H=\sum_k\beta_k\psi(H_k)$",
         facecolor="#ffffff",
         edgecolor=COLORS["red_edge"],
-        body_size=4.65,
+        body_size=4.55,
     )
     _rounded_box(
         ax,
@@ -316,10 +316,10 @@ def plot_framework(output_path: Path) -> None:
         1.62,
         0.84,
         title="Gate",
-        body=r"$g_i=\sigma(\mathrm{MLP})$" + "\nnode-wise",
+        body=r"$g_i=\sigma(\mathrm{MLP}(r_i))$",
         facecolor="#ffffff",
         edgecolor=COLORS["green_edge"],
-        body_size=4.80,
+        body_size=4.55,
     )
     _gate_meter(ax, 5.78, 1.02, 0.90, edgecolor=COLORS["green_edge"])
 
@@ -333,7 +333,7 @@ def plot_framework(output_path: Path) -> None:
         body=r"$Z_i=(1-g_i)Z_{L,i}$" + "\n" + r"$+\,g_iZ_{H,i}$",
         facecolor=COLORS["gold_fill"],
         edgecolor=COLORS["gold_edge"],
-        body_size=5.15,
+        body_size=4.75,
         linewidth=0.88,
     )
     _fusion_icon(ax, 8.82, 2.08)
@@ -347,7 +347,7 @@ def plot_framework(output_path: Path) -> None:
         body=r"$\hat y_i$",
         facecolor=COLORS["purple_fill"],
         edgecolor=COLORS["purple_edge"],
-        body_size=6.05,
+        body_size=6.70,
         linewidth=0.82,
     )
 
@@ -363,13 +363,16 @@ def plot_framework(output_path: Path) -> None:
     _arrow(ax, (7.04, 1.39), (7.72, 2.10), color=COLORS["green_edge"], rad=0.12, linewidth=0.74)
     _arrow(ax, (9.74, 2.50), (10.08, 2.50), color=COLORS["purple_edge"], linewidth=0.76)
 
-    ax.text(7.33, 3.25, r"$Z_L$", ha="center", va="center", fontsize=5.20, color=COLORS["blue_edge"])
-    ax.text(7.34, 2.31, r"$Z_H$", ha="center", va="center", fontsize=5.20, color=COLORS["red_edge"])
-    ax.text(7.29, 1.81, r"$g_i$", ha="center", va="center", fontsize=5.20, color=COLORS["green_edge"])
+    ax.text(7.34, 3.42, r"$Z_L$", ha="center", va="center", fontsize=5.30, color=COLORS["blue_edge"])
+    ax.text(7.37, 2.34, r"$Z_H$", ha="center", va="center", fontsize=5.30, color=COLORS["red_edge"])
+    ax.text(7.30, 1.78, r"$g_i$", ha="center", va="center", fontsize=5.30, color=COLORS["green_edge"])
 
     fig.savefig(output_path, bbox_inches="tight", pad_inches=0.035)
+    vector_path = output_path.with_suffix(".pdf")
+    fig.savefig(vector_path, bbox_inches="tight", pad_inches=0.035)
     plt.close(fig)
     print(f"[saved] {output_path}")
+    print(f"[saved] {vector_path}")
 
 
 def main() -> None:

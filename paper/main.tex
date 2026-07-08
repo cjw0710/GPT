@@ -21,6 +21,7 @@
 \newcommand{\base}{HARP-GNN}
 \newcommand{\esep}{HARP-ESep}
 \newcommand{\method}{HARP-Select}
+\newcommand{\papertablesize}{\footnotesize}
 
 \title{\method: Confidence-Calibrated Residual Polynomial Experts for Heterophilous Graphs}
 \author{
@@ -112,10 +113,14 @@ Figure~\ref{fig:select-framework} summarizes the two-expert training and validat
 
 \begin{figure*}[t]
 \centering
-\IfFileExists{figures/harp_select_framework.png}{
-  \includegraphics[width=\textwidth]{figures/harp_select_framework.png}
+\IfFileExists{figures/harp_select_framework.pdf}{
+  \includegraphics[width=\textwidth]{figures/harp_select_framework.pdf}
 }{
-  \fbox{\rule{0pt}{1.5in}\rule{0.95\textwidth}{0pt}}
+  \IfFileExists{figures/harp_select_framework.png}{
+    \includegraphics[width=\textwidth]{figures/harp_select_framework.png}
+  }{
+    \fbox{\rule{0pt}{1.5in}\rule{0.95\textwidth}{0pt}}
+  }
 }
 \caption{\method{} framework. Two residual polynomial experts are trained with the same split and optimization budget. The routing rule uses validation accuracy only and is fixed across datasets; test labels are evaluated only after the branch decision has been made.}
 \label{fig:select-framework}
@@ -241,24 +246,24 @@ For the binary critical-heterophily suite, we implement ROC-AUC support and repo
 
 \begin{table}[t]
 \centering
-\caption{External critical-heterophily dataset statistics for split 0. Edges are undirected after symmetrization; Hom. is edge homophily.}
+\caption{External critical-heterophily dataset statistics for split 0. Split lists train/validation/test counts; edges are undirected after symmetrization; Hom. is edge homophily.}
 \label{tab:critical-data}
 \begingroup
-\setlength{\tabcolsep}{2pt}
-\small
-\resizebox{\linewidth}{!}{%
+\setlength{\tabcolsep}{2.1pt}
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/critical_heterophily_dataset_stats.tex}{
   \input{tables/critical_heterophily_dataset_stats.tex}
 }{
-  \begin{tabular}{lrrrrrrrr}
+  \begin{tabular}{lrrrrr}
   \toprule
-  Dataset & Nodes & Edges & Feat. & Classes & Train & Val. & Test & Hom. \\
+  Dataset & $|V|$ & $|E|$ & $d/C$ & Split & Hom. \\
   \midrule
-  roman-empire & -- & -- & -- & -- & -- & -- & -- & -- \\
-  amazon-ratings & -- & -- & -- & -- & -- & -- & -- & -- \\
+  Roman-Emp. & -- & -- & -- & -- & -- \\
+  Amazon-Rat. & -- & -- & -- & -- & -- \\
   \bottomrule
   \end{tabular}
-}}
+}
 \endgroup
 \end{table}
 
@@ -286,8 +291,8 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \label{tab:harp-select}
 \begingroup
 \setlength{\tabcolsep}{3pt}
-\small
-\resizebox{\textwidth}{!}{%
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/harp_select_results.tex}{
   \input{tables/harp_select_results.tex}
 }{
@@ -305,7 +310,7 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
   amazon-ratings & -- & -- & -- & -- & -- \\
   \bottomrule
   \end{tabular}
-}}
+}
 \endgroup
 \end{table*}
 
@@ -315,7 +320,8 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \label{tab:select-paired}
 \begingroup
 \setlength{\tabcolsep}{3pt}
-\small
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/harp_select_paired_tests.tex}{
   \input{tables/harp_select_paired_tests.tex}
 }{
@@ -341,8 +347,8 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \label{tab:select-robust}
 \begingroup
 \setlength{\tabcolsep}{2pt}
-\small
-\resizebox{\textwidth}{!}{%
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/harp_select_robust_tests.tex}{
   \input{tables/harp_select_robust_tests.tex}
 }{
@@ -358,7 +364,7 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
   wisconsin & -- & -- & -- & -- & -- & -- \\
   \bottomrule
   \end{tabular}
-}}
+}
 \endgroup
 \end{table*}
 
@@ -367,9 +373,9 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \caption{External critical-heterophily comparison against the strongest implemented non-HARP baseline. Best is the strongest non-HARP mean accuracy on that dataset. Diff is \method{} minus that best baseline over paired fixed splits; Holm $p$ is the exact sign-flip value after correction across the two \method{} rows.}
 \label{tab:critical-external-main}
 \begingroup
-\setlength{\tabcolsep}{3pt}
-\small
-\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/critical_heterophily_external_main.tex}{
   \input{tables/critical_heterophily_external_main.tex}
 }{
@@ -381,7 +387,7 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
   roman-empire & -- & -- & -- & -- & -- & -- & -- \\
   \bottomrule
   \end{tabular}
-}}
+}
 \endgroup
 \end{table*}
 
@@ -390,9 +396,9 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \caption{Binary critical-heterophily branch comparisons under ROC-AUC over 10 fixed splits. Diff is measured in ROC-AUC percentage points and equals \esep{} minus \base.}
 \label{tab:binary-critical}
 \begingroup
-\setlength{\tabcolsep}{3pt}
-\small
-\resizebox{\linewidth}{!}{%
+\setlength{\tabcolsep}{2.1pt}
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/critical_heterophily_binary_complete_paired_tests.tex}{
   \input{tables/critical_heterophily_binary_complete_paired_tests.tex}
 }{
@@ -404,7 +410,7 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
   tolokers & -- & -- & -- & -- & -- \\
   \bottomrule
   \end{tabular}
-}}
+}
 \endgroup
 \end{table}
 
@@ -440,10 +446,14 @@ Figure~\ref{fig:harp-block} depicts the internal residual polynomial block used 
 
 \begin{figure}[t]
 \centering
-\IfFileExists{figures/harp_framework.png}{
-  \includegraphics[width=\linewidth]{figures/harp_framework.png}
+\IfFileExists{figures/harp_framework.pdf}{
+  \includegraphics[width=\linewidth]{figures/harp_framework.pdf}
 }{
-  \fbox{\rule{0pt}{1.35in}\rule{0.92\linewidth}{0pt}}
+  \IfFileExists{figures/harp_framework.png}{
+    \includegraphics[width=\linewidth]{figures/harp_framework.png}
+  }{
+    \fbox{\rule{0pt}{1.35in}\rule{0.92\linewidth}{0pt}}
+  }
 }
 \caption{\base{} internal residual polynomial block. \method{} uses this self-loop expert as one branch and pairs it with an ego-separated no-self version of the same residual filtering idea.}
 \label{fig:harp-block}
@@ -455,7 +465,8 @@ Figure~\ref{fig:harp-block} depicts the internal residual polynomial block used 
 \label{tab:ablation}
 \begingroup
 \setlength{\tabcolsep}{3pt}
-\small
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/webkb_ablation_results.tex}{
   \input{tables/webkb_ablation_results.tex}
 }{
@@ -478,7 +489,8 @@ Figure~\ref{fig:harp-block} depicts the internal residual polynomial block used 
 \label{tab:filter-weights}
 \begingroup
 \setlength{\tabcolsep}{2pt}
-\small
+\renewcommand{\arraystretch}{1.08}
+\papertablesize
 \IfFileExists{tables/webkb_filter_weights.tex}{
   \input{tables/webkb_filter_weights.tex}
 }{

@@ -87,7 +87,7 @@ Copy-TreeFilesIntoArtifact -RelativeDir "scripts" -Include @("*.py", "*.ps1")
 Copy-TreeFilesIntoArtifact -RelativeDir "configs" -Include @("*.yaml")
 Copy-TreeFilesIntoArtifact -RelativeDir "results" -Include @("*.csv")
 Copy-TreeFilesIntoArtifact -RelativeDir "paper\tables" -Include @("*.tex")
-Copy-TreeFilesIntoArtifact -RelativeDir "paper\figures" -Include @("*.png")
+Copy-TreeFilesIntoArtifact -RelativeDir "paper\figures" -Include @("*.png", "*.pdf")
 
 foreach ($PaperFile in @(
     "paper\main.tex",
