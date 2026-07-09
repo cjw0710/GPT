@@ -31,6 +31,12 @@ try {
     Invoke-Step "HARP-Select framework figure" {
         python scripts\plot_harp_select_framework.py --output paper\figures\harp_select_framework.png
     }
+    Invoke-Step "HARP-Select split-level audit figure" {
+        python scripts\plot_selector_audit.py --input results\harp_select_diagnostics.csv --output paper\figures\selector_audit.png
+    }
+    Invoke-Step "HARP-Select threshold sensitivity figure" {
+        python scripts\plot_selector_sensitivity.py --input results\harp_select_threshold_sensitivity_overall.csv --output paper\figures\selector_sensitivity.png
+    }
     Invoke-Step "Planetoid results table" {
         python scripts\summarize_results.py --input results\planetoid_all.csv --output paper\tables\planetoid_results.tex
     }

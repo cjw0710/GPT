@@ -183,8 +183,10 @@ Tables read directly by `paper/main.tex`:
 
 Figures read directly by `paper/main.tex`:
 
-- `paper/figures/harp_select_framework.png`
-- `paper/figures/harp_framework.png`
+- `paper/figures/harp_select_framework.pdf`
+- `paper/figures/harp_framework.pdf`
+- `paper/figures/selector_audit.pdf`
+- `paper/figures/selector_sensitivity.pdf`
 - `paper/figures/synthetic_accuracy.png`
 
 Additional binary ROC-AUC support tables retained in the paper artifact:
@@ -217,6 +219,8 @@ Scientific audit:
 - `scripts/build_binary_critical_tables.py`: Builds complete-only binary critical-heterophily ROC-AUC paired and robust tables from the full run trace.
 - `scripts/plot_framework.py`: Generates the HARP-GNN framework diagram used in the Method section.
 - `scripts/plot_harp_select_framework.py`: Generates the HARP-Select two-expert routing framework diagram used in the Method section.
+- `scripts/plot_selector_audit.py`: Generates the split-level validation-surplus and held-out branch-advantage audit figure from selector diagnostics.
+- `scripts/plot_selector_sensitivity.py`: Generates the frozen-threshold sensitivity plot from the aggregate selector sweep.
 - `scripts/analyze_selector_sensitivity.py`: Generates HARP-Select fixed-threshold sensitivity CSVs, a LaTeX summary table, and the standalone selector-sensitivity diagnostic note.
 - `scripts/analyze_selector_cost.py`: Generates HARP-Select recorded training-cost CSVs, a LaTeX summary table, and the standalone selector-cost diagnostic note.
 - `scripts/check_sparse_conversion.py`: Verifies the CSR-backed sparse conversion path against direct SciPy sparse semantics.

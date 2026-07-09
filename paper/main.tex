@@ -574,25 +574,40 @@ It also prevents three common failure modes in graph benchmark papers.
 First, it separates architecture search from test-set reporting.
 Second, it exposes datasets where a branch looks promising on average but is too unstable to select confidently on a fixed split.
 Third, it reveals when the proposed family is simply missing a stronger expert, as in the larger Geom-GCN deficits.
-\paragraph{Scope for extensions.}
-The present implementation keeps two residual polynomial experts and a conservative graph-level selector.
-This is a deliberate restriction rather than an assumption that two experts are sufficient.
-The same evaluation protocol could support richer expert libraries, node-level confidence rules, or cheaper distilled selectors, but those variants should be judged under the same frozen-split discipline.
-In particular, a learned gate should be compared against the transparent selector on regret, calibration, and stability, not only on mean accuracy.
-Likewise, adding recent heterophily baselines should preserve the distinction between primary claims, diagnostic branches, and non-claimed sanity checks.
-The goal is to make subsequent evaluations scientifically harder to overclaim: stronger baselines may reduce the apparent advantage, but they will also clarify whether branch-aware residual filtering solves a reproducible modeling problem.
+Figure~\ref{fig:selector-audit} makes this audit split-level rather than aggregate.
+The validation surplus is decisively positive on Squirrel, Chameleon, and Roman-Empire, matching their all-\esep{} routing, while Actor and Amazon-Ratings remain close to the decision boundary and are conservatively retained by \base.
+The held-out panel confirms aligned gains in the three switched datasets while exposing borderline cases hidden by mean-only tables.
+Figure~\ref{fig:selector-sensitivity} further shows that increasing the confidence multiplier monotonically reduces \esep{} selections; the frozen $z=1.96$ rule lies in a low-regret plateau rather than at a test-tuned optimum.
+
+\begin{figure}[!b]
+\centering
+\IfFileExists{figures/selector_audit.pdf}{
+  \includegraphics[width=\linewidth]{figures/selector_audit.pdf}
+}{
+  \includegraphics[width=\linewidth]{figures/selector_audit.png}
+}
+\caption{Selector audit over eight accuracy datasets (10 splits each). Positive validation surplus triggers \esep; the test difference is inspected only after routing. Blue retains \base, green selects \esep, and diamonds denote means.}
+\label{fig:selector-audit}
+\end{figure}
+
+\begin{figure}[!b]
+\centering
+\IfFileExists{figures/selector_sensitivity.pdf}{
+  \includegraphics[width=\linewidth]{figures/selector_sensitivity.pdf}
+}{
+  \includegraphics[width=\linewidth]{figures/selector_sensitivity.png}
+}
+\caption{Post-hoc sensitivity of the frozen selector over all 80 accuracy splits. The submitted operating point is $z=1.96$; the sweep is diagnostic and does not retune reported results.}
+\label{fig:selector-sensitivity}
+\end{figure}
 
 \section{Conclusion}
 
-\method{} frames heterophilous graph learning as a choice between residual polynomial experts rather than a commitment to one universal graph filter.
-The self-loop expert is useful on WebKB-style graphs, the ego-separated no-self expert repairs larger heterophily failures and improves Roman-Empire under paired tests, and a frozen validation-calibrated selector routes between them without test labels.
-The evidence is deliberately bounded: it supports an auditable specialist-and-routing formulation rather than a universal heterophily leaderboard result.
-This boundedness is useful because it identifies the next scientific tests: stronger official baselines, the remaining ROC-AUC critical datasets, and cheaper deployable selectors.
-The broader methodological lesson is that heterophily mechanisms should be evaluated with the same visibility as their accuracy numbers.
-When a model changes the role of self-loops, high-pass residuals, gates, or branch selectors, the paper should show how that choice was made before test evaluation and where the same choice fails.
-\method{} follows this discipline by turning branch selection into a recorded decision rule rather than an implicit hyperparameter.
-New datasets, experts, and learned gates can be added under the same audit trail by reporting validation margins, thresholds, selected branches, oracle regret, and final paired evidence.
-Under that standard, a branch-aware graph model should not only fit labels on a benchmark; it should explain which structural evidence it trusted and why that trust was justified before seeing the test labels.
+\method{} treats heterophilous graph learning as a validation-calibrated choice between residual polynomial experts rather than a commitment to one universal filter.
+The self-loop expert is useful on WebKB, the ego-separated expert repairs Chameleon and Squirrel failures and improves Roman-Empire, and the frozen selector routes between them without test labels.
+Split-level audits distinguish decisive switches from borderline cases, while the threshold sweep shows that $z=1.96$ is a conservative low-regret operating point rather than a test-tuned optimum.
+The evidence is deliberately bounded: it supports an auditable specialist-and-routing formulation, not universal leaderboard dominance.
+Stronger official baselines, richer expert libraries, and cheaper selectors are the next tests, and should retain the same pre-test decision and paired-evidence protocol.
 
 \clearpage
 \typeout{HARP_REFERENCES_START_PAGE=\thepage}
