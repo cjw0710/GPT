@@ -143,12 +143,6 @@ scripts/      Experiment, table-generation, packaging, and verification tools.
 src/harp_gnn/ Dataset loaders, model definitions, training loop, and runner.
 ```
 
-## Anonymous GitHub Use
-
-For double-blind review, submit the frozen Code and Data ZIP through the official
-submission system. Do not cite a mutable external GitHub URL in the paper unless
-the conference instructions explicitly permit it. See
-`ANONYMITY_AND_RELEASE.md` for anonymous GitHub mirroring guidance.
 
 ## License
 
