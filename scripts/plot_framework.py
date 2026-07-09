@@ -45,9 +45,10 @@ def _rounded_box(
     body: str,
     facecolor: str,
     edgecolor: str,
-    title_size: float = 6.35,
+    title_size: float = 5.00,
     body_size: float = 5.70,
     linewidth: float = 0.78,
+    body_fraction: float = 0.43,
 ) -> None:
     patch = FancyBboxPatch(
         (x, y),
@@ -63,16 +64,17 @@ def _rounded_box(
     if title:
         ax.text(
             x + w / 2,
-            y + h - 0.12,
+            y + h - 0.14,
             title,
             ha="center",
             va="top",
             fontsize=title_size,
-            fontweight="bold",
+            fontweight="semibold",
+            fontfamily="DejaVu Sans",
             color=COLORS["ink"],
             zorder=3,
         )
-        body_y = y + h / 2 - 0.10
+        body_y = y + h * body_fraction
     else:
         body_y = y + h / 2
     ax.text(
@@ -117,12 +119,13 @@ def _arrow(
 def _stage_header(ax: plt.Axes, x0: float, x1: float, label: str) -> None:
     ax.text(
         (x0 + x1) / 2,
-        5.18,
+        5.35,
         label.upper(),
         ha="center",
         va="center",
-        fontsize=5.85,
-        fontweight="bold",
+        fontsize=5.20,
+        fontweight="semibold",
+        fontfamily="DejaVu Sans",
         color=COLORS["muted"],
     )
 
@@ -177,9 +180,9 @@ def _fusion_icon(ax: plt.Axes, cx: float, cy: float) -> None:
 
 def _input_box(ax: plt.Axes) -> None:
     patch = FancyBboxPatch(
-        (0.30, 1.58),
-        1.20,
-        2.16,
+        (0.22, 1.50),
+        1.38,
+        2.38,
         boxstyle="round,pad=0.018,rounding_size=0.045",
         linewidth=0.78,
         edgecolor="#4b5563",
@@ -188,21 +191,22 @@ def _input_box(ax: plt.Axes) -> None:
     )
     ax.add_patch(patch)
     ax.text(
-        0.90,
-        3.58,
+        0.91,
+        3.68,
         "Graph\ninput",
         ha="center",
         va="top",
-        fontsize=6.25,
-        fontweight="bold",
+        fontsize=5.20,
+        fontweight="semibold",
+        fontfamily="DejaVu Sans",
         color=COLORS["ink"],
         zorder=3,
     )
-    _graph_icon(ax, 0.90, 2.77, scale=0.64)
+    _graph_icon(ax, 0.91, 2.77, scale=0.64)
     ax.text(
-        0.90,
-        1.98,
-        r"$X,\ \hat A$" + "\nfeatures, adjacency",
+        0.91,
+        1.93,
+        r"features $X$" + "\n" + r"adjacency $\hat A$",
         ha="center",
         va="center",
         fontsize=4.65,
@@ -215,23 +219,23 @@ def _input_box(ax: plt.Axes) -> None:
 def plot_framework(output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(3.35, 2.50), dpi=400)
+    fig, ax = plt.subplots(figsize=(3.35, 2.64), dpi=400)
     ax.set_xlim(0, 10.85)
-    ax.set_ylim(0, 5.45)
+    ax.set_ylim(0, 5.62)
     ax.axis("off")
 
     stages = [
-        (0.12, 1.70, "input"),
-        (1.86, 5.02, "bases"),
-        (5.18, 7.30, "mix"),
-        (7.46, 10.72, "prediction"),
+        (0.10, 1.68, "input"),
+        (1.84, 4.72, "bases"),
+        (4.88, 7.42, "mix"),
+        (7.58, 10.74, "prediction"),
     ]
     for x0, x1, label in stages:
         ax.add_patch(
             Rectangle(
-                (x0, 0.22),
+                (x0, 0.18),
                 x1 - x0,
-                4.72,
+                4.92,
                 facecolor=COLORS["panel"],
                 edgecolor="#e2e7ec",
                 linewidth=0.48,
@@ -240,107 +244,108 @@ def plot_framework(output_path: Path) -> None:
         )
         _stage_header(ax, x0, x1, label)
 
-    for x in [1.78, 5.10, 7.38]:
-        ax.plot([x, x], [0.34, 4.83], color="#cbd4dd", linewidth=0.55, linestyle=(0, (2.2, 2.2)), zorder=1)
+    for x in [1.76, 4.80, 7.50]:
+        ax.plot([x, x], [0.30, 4.98], color="#cbd4dd", linewidth=0.55, linestyle=(0, (2.2, 2.2)), zorder=1)
 
     _input_box(ax)
 
     _rounded_box(
         ax,
-        2.12,
-        3.48,
+        1.97,
+        3.58,
         2.55,
-        0.86,
+        0.98,
         title="Low-pass basis",
         body=r"$L_k=\hat A^kX$",
         facecolor=COLORS["blue_fill"],
         edgecolor=COLORS["blue_edge"],
         body_size=5.55,
     )
-    _tiny_filter(ax, 2.24, 3.59, 0.38, 0.30, mode="low")
+    _tiny_filter(ax, 2.10, 3.69, 0.38, 0.32, mode="low")
     _rounded_box(
         ax,
-        2.12,
-        2.22,
+        1.97,
+        2.20,
         2.55,
-        0.86,
+        0.98,
         title="Residual basis",
         body=r"$H_k=L_{k-1}-L_k$",
         facecolor=COLORS["red_fill"],
         edgecolor=COLORS["red_edge"],
         body_size=5.50,
     )
-    _tiny_filter(ax, 2.24, 2.32, 0.36, 0.30, mode="high")
+    _tiny_filter(ax, 2.10, 2.31, 0.36, 0.32, mode="high")
     _rounded_box(
         ax,
-        2.12,
-        0.96,
+        1.97,
+        0.82,
         2.55,
-        0.86,
+        0.98,
         title="Node variation",
         body=r"$r_i=\|x_i-\hat A x_i\|$",
         facecolor=COLORS["green_fill"],
         edgecolor=COLORS["green_edge"],
         body_size=5.25,
     )
-    _tiny_filter(ax, 2.24, 1.06, 0.36, 0.30, mode="band")
+    _tiny_filter(ax, 2.10, 0.93, 0.36, 0.32, mode="band")
 
     _rounded_box(
         ax,
-        5.42,
-        3.48,
-        1.62,
-        0.84,
+        5.05,
+        3.58,
+        2.05,
+        0.98,
         title="Low mix",
         body=r"$Z_L=\sum_k\alpha_k\phi(L_k)$",
         facecolor="#ffffff",
         edgecolor=COLORS["blue_edge"],
-        body_size=4.60,
+        body_size=4.78,
     )
     _rounded_box(
         ax,
-        5.42,
-        2.22,
-        1.62,
-        0.84,
+        5.05,
+        2.20,
+        2.05,
+        0.98,
         title="High mix",
         body=r"$Z_H=\sum_k\beta_k\psi(H_k)$",
         facecolor="#ffffff",
         edgecolor=COLORS["red_edge"],
-        body_size=4.55,
+        body_size=4.74,
     )
     _rounded_box(
         ax,
-        5.42,
-        0.96,
-        1.62,
-        0.84,
+        5.05,
+        0.82,
+        2.05,
+        0.98,
         title="Gate",
         body=r"$g_i=\sigma(\mathrm{MLP}(r_i))$",
         facecolor="#ffffff",
         edgecolor=COLORS["green_edge"],
-        body_size=4.55,
+        body_size=4.48,
     )
-    _gate_meter(ax, 5.78, 1.02, 0.90, edgecolor=COLORS["green_edge"])
+    _gate_meter(ax, 5.55, 0.91, 1.05, edgecolor=COLORS["green_edge"])
 
     _rounded_box(
         ax,
-        7.72,
-        1.82,
-        2.02,
-        1.36,
+        7.76,
+        1.70,
+        2.22,
+        1.66,
         title="Gated fusion",
         body=r"$Z_i=(1-g_i)Z_{L,i}$" + "\n" + r"$+\,g_iZ_{H,i}$",
         facecolor=COLORS["gold_fill"],
         edgecolor=COLORS["gold_edge"],
-        body_size=4.75,
+        body_size=4.92,
         linewidth=0.88,
+        body_fraction=0.59,
     )
-    _fusion_icon(ax, 8.82, 2.08)
+    _fusion_icon(ax, 8.87, 2.03)
     _rounded_box(
         ax,
-        10.08,
-        2.06,
+        10.19,
+        2.10,
         0.50,
         0.88,
         title="",
@@ -351,21 +356,22 @@ def plot_framework(output_path: Path) -> None:
         linewidth=0.82,
     )
 
-    _arrow(ax, (1.50, 2.92), (2.12, 3.91), color=COLORS["blue_edge"], rad=0.15, linewidth=0.78)
-    _arrow(ax, (1.50, 2.66), (2.12, 2.65), color=COLORS["red_edge"], linewidth=0.78)
-    _arrow(ax, (1.50, 2.38), (2.12, 1.39), color=COLORS["green_edge"], rad=-0.15, linewidth=0.78)
+    _arrow(ax, (1.60, 2.96), (1.97, 4.07), color=COLORS["blue_edge"], rad=0.15, linewidth=0.78)
+    _arrow(ax, (1.60, 2.68), (1.97, 2.69), color=COLORS["red_edge"], linewidth=0.78)
+    _arrow(ax, (1.60, 2.40), (1.97, 1.31), color=COLORS["green_edge"], rad=-0.15, linewidth=0.78)
 
-    for y, color in [(3.91, COLORS["blue_edge"]), (2.65, COLORS["red_edge"]), (1.39, COLORS["green_edge"])]:
-        _arrow(ax, (4.67, y), (5.42, y), color=color, linewidth=0.72)
+    for y, color in [(4.07, COLORS["blue_edge"]), (2.69, COLORS["red_edge"]), (1.31, COLORS["green_edge"])]:
+        _arrow(ax, (4.52, y), (5.05, y), color=color, linewidth=0.72)
 
-    _arrow(ax, (7.04, 3.91), (7.72, 2.90), color=COLORS["blue_edge"], rad=-0.10, linewidth=0.74)
-    _arrow(ax, (7.04, 2.65), (7.72, 2.52), color=COLORS["red_edge"], linewidth=0.74)
-    _arrow(ax, (7.04, 1.39), (7.72, 2.10), color=COLORS["green_edge"], rad=0.12, linewidth=0.74)
-    _arrow(ax, (9.74, 2.50), (10.08, 2.50), color=COLORS["purple_edge"], linewidth=0.76)
+    _arrow(ax, (7.10, 4.07), (7.76, 3.03), color=COLORS["blue_edge"], rad=-0.10, linewidth=0.74)
+    _arrow(ax, (7.10, 2.69), (7.76, 2.64), color=COLORS["red_edge"], linewidth=0.74)
+    _arrow(ax, (7.10, 1.31), (7.76, 2.08), color=COLORS["green_edge"], rad=0.12, linewidth=0.74)
+    _arrow(ax, (9.98, 2.54), (10.19, 2.54), color=COLORS["purple_edge"], linewidth=0.76)
 
-    ax.text(7.34, 3.42, r"$Z_L$", ha="center", va="center", fontsize=5.30, color=COLORS["blue_edge"])
-    ax.text(7.37, 2.34, r"$Z_H$", ha="center", va="center", fontsize=5.30, color=COLORS["red_edge"])
-    ax.text(7.30, 1.78, r"$g_i$", ha="center", va="center", fontsize=5.30, color=COLORS["green_edge"])
+    label_box = dict(facecolor="white", edgecolor="none", alpha=0.88, pad=0.35)
+    ax.text(7.39, 3.53, r"$Z_L$", ha="center", va="center", fontsize=5.20, color=COLORS["blue_edge"], bbox=label_box)
+    ax.text(7.38, 2.47, r"$Z_H$", ha="center", va="center", fontsize=5.20, color=COLORS["red_edge"], bbox=label_box)
+    ax.text(7.35, 1.76, r"$g_i$", ha="center", va="center", fontsize=5.20, color=COLORS["green_edge"], bbox=label_box)
 
     fig.savefig(output_path, bbox_inches="tight", pad_inches=0.035)
     vector_path = output_path.with_suffix(".pdf")

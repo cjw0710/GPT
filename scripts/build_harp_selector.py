@@ -69,7 +69,7 @@ def _format_mean_std(values: pd.Series) -> str:
 
 def _write_summary_table(diagnostics: pd.DataFrame, output_path: Path) -> None:
     lines = [
-        r"\begin{tabular}{lccccc}",
+        r"\begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}lccccc@{}}",
         r"\toprule",
         r"Dataset & HARP-GNN & HARP-ESep & HARP-Select & Oracle & ESep splits \\",
         r"\midrule",
@@ -83,7 +83,7 @@ def _write_summary_table(diagnostics: pd.DataFrame, output_path: Path) -> None:
             f"{_format_mean_std(part['oracle_test_acc'])} & "
             f"{int(part['selected_esep'].sum())}/{len(part)} \\\\"
         )
-    lines.extend([r"\bottomrule", r"\end{tabular}"])
+    lines.extend([r"\bottomrule", r"\end{tabular*}"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

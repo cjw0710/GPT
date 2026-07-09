@@ -121,8 +121,10 @@ def summarize(input_path: Path, output_path: Path) -> pd.DataFrame:
         index=False,
         escape=False,
         na_rep="--",
-        column_format="l" + "c" * (len(table.columns) - 1),
+        column_format=r"@{\extracolsep{\fill}}" + "l" + "c" * (len(table.columns) - 1) + "@{}",
     )
+    latex = latex.replace(r"\begin{tabular}", r"\begin{tabular*}{0.94\linewidth}", 1)
+    latex = latex.replace(r"\end{tabular}", r"\end{tabular*}", 1)
     output_path.write_text(latex, encoding="utf-8")
     print(table)
     print(f"[saved] {output_path}")

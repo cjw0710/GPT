@@ -252,20 +252,20 @@ For the binary critical-heterophily suite, we implement ROC-AUC support and repo
 \caption{External critical-heterophily dataset statistics for split 0. Split lists train/validation/test counts; edges are undirected after symmetrization; Hom. is edge homophily.}
 \label{tab:critical-data}
 \begingroup
-\setlength{\tabcolsep}{2.1pt}
+\setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{1.08}
 \papertablesize
 \IfFileExists{tables/critical_heterophily_dataset_stats.tex}{
   \input{tables/critical_heterophily_dataset_stats.tex}
 }{
-  \begin{tabular}{lrrrrr}
+  \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrr@{}}
   \toprule
   Dataset & $|V|$ & $|E|$ & $d/C$ & Split & Hom. \\
   \midrule
   Roman-Emp. & -- & -- & -- & -- & -- \\
   Amazon-Rat. & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table}
@@ -293,13 +293,13 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \caption{\method{} summary over fixed splits. HARP-Select chooses \esep{} only when its validation advantage exceeds the frozen $1.96\,\mathrm{SE}$ threshold. Oracle is reported only as diagnostic regret, not as a method.}
 \label{tab:harp-select}
 \begingroup
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{1.08}
 \papertablesize
 \IfFileExists{tables/harp_select_results.tex}{
   \input{tables/harp_select_results.tex}
 }{
-  \begin{tabular}{lccccc}
+  \begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}lccccc@{}}
   \toprule
   Dataset & HARP-GNN & HARP-ESep & HARP-Select & Oracle & ESep splits \\
   \midrule
@@ -312,7 +312,7 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
   roman-empire & -- & -- & -- & -- & -- \\
   amazon-ratings & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table*}
@@ -322,13 +322,13 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \caption{\method{} versus the strongest implemented non-HARP baseline on the original six fixed-split heterophily datasets. Diff is measured in percentage points over matched splits.}
 \label{tab:select-paired}
 \begingroup
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{1.08}
 \papertablesize
 \IfFileExists{tables/harp_select_paired_tests.tex}{
   \input{tables/harp_select_paired_tests.tex}
 }{
-  \begin{tabular}{llcccc}
+  \begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}llcccc@{}}
   \toprule
   Dataset & Best baseline & Baseline & HARP-Select & Diff (pp) & $p$ \\
   \midrule
@@ -339,7 +339,7 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
   texas & -- & -- & -- & -- & -- \\
   wisconsin & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table*}
@@ -349,13 +349,13 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \caption{Robust split-level checks for \method{} against the strongest implemented non-HARP baseline. W/T/L counts split-level wins, ties, and losses; Holm $p$ adjusts exact sign-flip tests across the six rows.}
 \label{tab:select-robust}
 \begingroup
-\setlength{\tabcolsep}{2pt}
+\setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{1.08}
 \papertablesize
 \IfFileExists{tables/harp_select_robust_tests.tex}{
   \input{tables/harp_select_robust_tests.tex}
 }{
-  \begin{tabular}{llccccc}
+  \begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}llccccc@{}}
   \toprule
   Dataset & Baseline & Diff (pp) & Bootstrap 95\% CI & W/T/L & Sign-flip $p$ & Holm $p$ \\
   \midrule
@@ -366,7 +366,7 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
   texas & -- & -- & -- & -- & -- & -- \\
   wisconsin & -- & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table*}
@@ -382,14 +382,14 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \IfFileExists{tables/critical_heterophily_external_main.tex}{
   \input{tables/critical_heterophily_external_main.tex}
 }{
-  \begin{tabular}{llcccccc}
+  \begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}llcccccc@{}}
   \toprule
   Dataset & Best non-HARP & Best & HARP-GNN & HARP-ESep & HARP-Select & Diff (pp) & Holm $p$ \\
   \midrule
   amazon-ratings & -- & -- & -- & -- & -- & -- & -- \\
   roman-empire & -- & -- & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table*}
@@ -399,20 +399,20 @@ This is deliberately more bookkeeping than a standard benchmark script, but it r
 \caption{Binary critical-heterophily branch comparisons under ROC-AUC over 10 fixed splits. Diff is measured in ROC-AUC percentage points and equals \esep{} minus \base.}
 \label{tab:binary-critical}
 \begingroup
-\setlength{\tabcolsep}{2.1pt}
+\setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{1.08}
 \papertablesize
 \IfFileExists{tables/critical_heterophily_binary_complete_paired_tests.tex}{
   \input{tables/critical_heterophily_binary_complete_paired_tests.tex}
 }{
-  \begin{tabular}{lccccc}
+  \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lccccc@{}}
   \toprule
   Dataset & HARP-GNN & HARP-ESep & Diff (pp) & $n$ & $p$ \\
   \midrule
   minesweeper & -- & -- & -- & -- & -- \\
   tolokers & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table}
@@ -467,13 +467,13 @@ Figure~\ref{fig:harp-block} depicts the internal residual polynomial block used 
 \caption{WebKB ablations isolating multi-hop mixing, low/high-pass residual branches, and the gate signal.}
 \label{tab:ablation}
 \begingroup
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{1.08}
 \papertablesize
 \IfFileExists{tables/webkb_ablation_results.tex}{
   \input{tables/webkb_ablation_results.tex}
 }{
-  \begin{tabular}{lccccc}
+  \begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}lccccc@{}}
   \toprule
   Dataset & MixHop & HARP-GNN & HARP-Low & HARP-High & HARP-NoSignal \\
   \midrule
@@ -481,7 +481,7 @@ Figure~\ref{fig:harp-block} depicts the internal residual polynomial block used 
   Wisconsin & -- & -- & -- & -- & -- \\
   Cornell & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table*}
@@ -491,13 +491,13 @@ Figure~\ref{fig:harp-block} depicts the internal residual polynomial block used 
 \caption{Learned \base{} polynomial weights on WebKB. Low-pass bases are $L_0,\ldots,L_3$ and high-pass residual bases are $H_1,\ldots,H_3$.}
 \label{tab:filter-weights}
 \begingroup
-\setlength{\tabcolsep}{2pt}
+\setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{1.08}
 \papertablesize
 \IfFileExists{tables/webkb_filter_weights.tex}{
   \input{tables/webkb_filter_weights.tex}
 }{
-  \begin{tabular}{lccccccc}
+  \begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}lccccccc@{}}
   \toprule
   Dataset & L0 & L1 & L2 & L3 & H1 & H2 & H3 \\
   \midrule
@@ -505,7 +505,7 @@ Figure~\ref{fig:harp-block} depicts the internal residual polynomial block used 
   Wisconsin & -- & -- & -- & -- & -- & -- & -- \\
   Cornell & -- & -- & -- & -- & -- & -- & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular*}
 }
 \endgroup
 \end{table*}

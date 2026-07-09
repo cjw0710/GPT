@@ -134,7 +134,7 @@ def _p(value: float) -> str:
 
 def write_latex(results: pd.DataFrame, output_path: Path) -> None:
     lines = [
-        r"\begin{tabular}{llccccc}",
+        r"\begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}llccccc@{}}",
         r"\toprule",
         r"Dataset & Baseline & Diff (pp) & Bootstrap 95\% CI & W/T/L & Sign-flip $p$ & Holm $p$ \\",
         r"\midrule",
@@ -147,7 +147,7 @@ def write_latex(results: pd.DataFrame, output_path: Path) -> None:
             f"{row.wins}/{row.ties}/{row.losses} & "
             f"{_p(row.sign_flip_p_value)} & {_p(row.sign_flip_p_holm)} \\\\"
         )
-    lines.extend([r"\bottomrule", r"\end{tabular}"])
+    lines.extend([r"\bottomrule", r"\end{tabular*}"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

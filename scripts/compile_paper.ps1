@@ -89,7 +89,10 @@ try {
         & $pdflatex -interaction=nonstopmode -halt-on-error main.tex
     }
 
-    Copy-Item -LiteralPath (Join-Path $SourceDir "main.pdf") -Destination (Join-Path $PaperDir "HARP_GNN_AAAI2027_official_compile.pdf") -Force
+    $CompiledPdf = Join-Path $SourceDir "main.pdf"
+    Copy-Item -LiteralPath $CompiledPdf -Destination (Join-Path $PaperDir "HARP_GNN_AAAI2027_official_compile.pdf") -Force
+    Copy-Item -LiteralPath $CompiledPdf -Destination (Join-Path $PaperDir "main.pdf") -Force
+    Copy-Item -LiteralPath $CompiledPdf -Destination (Join-Path $PaperDir "main_latest.pdf") -Force
     Copy-Item -LiteralPath (Join-Path $SourceDir "main.log") -Destination (Join-Path $PaperDir "main.log") -Force
     Copy-Item -LiteralPath (Join-Path $SourceDir "main.aux") -Destination (Join-Path $PaperDir "main.aux") -Force
     Copy-Item -LiteralPath (Join-Path $SourceDir "main.bbl") -Destination (Join-Path $PaperDir "main.bbl") -Force

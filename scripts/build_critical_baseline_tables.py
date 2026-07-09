@@ -266,7 +266,7 @@ def write_main_external_table(summary: pd.DataFrame, tests: pd.DataFrame, output
         raise ValueError("Cannot build compact external table without HARP-Select paired tests.")
 
     lines = [
-        r"\begin{tabular}{llcccccc}",
+        r"\begin{tabular*}{0.94\linewidth}{@{\extracolsep{\fill}}llcccccc@{}}",
         r"\toprule",
         r"Dataset & Best non-HARP & Best & HARP-GNN & HARP-ESep & HARP-Select & Diff (pp) & Holm $p$ \\",
         r"\midrule",
@@ -285,7 +285,7 @@ def write_main_external_table(summary: pd.DataFrame, tests: pd.DataFrame, output
             f"{_format_mean_std(select_mean, select_std)} & "
             f"{100.0 * row.diff_mean:+.2f} & {_p(row.sign_flip_p_holm)} \\\\"
         )
-    lines.extend([r"\bottomrule", r"\end{tabular}"])
+    lines.extend([r"\bottomrule", r"\end{tabular*}"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"[saved] {output_path}")

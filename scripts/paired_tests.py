@@ -114,8 +114,10 @@ def write_latex(results: pd.DataFrame, output_path: Path) -> None:
     latex = display.to_latex(
         index=False,
         escape=False,
-        column_format="llcccc",
+        column_format=r"@{\extracolsep{\fill}}llcccc@{}",
     )
+    latex = latex.replace(r"\begin{tabular}", r"\begin{tabular*}{0.94\linewidth}", 1)
+    latex = latex.replace(r"\end{tabular}", r"\end{tabular*}", 1)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(latex, encoding="utf-8")
     print(display)

@@ -183,7 +183,7 @@ def build_tables(
 
 def _write_paired_latex(results: pd.DataFrame, output_path: Path) -> None:
     lines = [
-        r"\begin{tabular}{lccccc}",
+        r"\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lccccc@{}}",
         r"\toprule",
         r"Dataset & HARP-GNN & HARP-ESep & Diff (pp) & $n$ & $p$ \\",
         r"\midrule",
@@ -196,7 +196,7 @@ def _write_paired_latex(results: pd.DataFrame, output_path: Path) -> None:
             f"{100.0 * row.diff_mean:+.2f} & "
             f"{row.n} & {_p(row.p_value)} \\\\"
         )
-    lines.extend([r"\bottomrule", r"\end{tabular}"])
+    lines.extend([r"\bottomrule", r"\end{tabular*}"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
