@@ -83,18 +83,20 @@ Our contributions are:
 
 \paragraph{Low-pass message passing.}
 GCN \cite{kipf2017semi}, GraphSAGE \cite{hamilton2017inductive}, SGC \cite{wu2019simplifying}, APPNP \cite{klicpera2019predict}, GAT \cite{velickovic2018graph}, and GIN \cite{xu2019powerful} are representative architectures that propagate information over graph neighborhoods.
-They are strong when connected nodes tend to share labels, but their aggregation mechanisms often behave as low-pass filters that can oversmooth or mis-smooth under heterophily.
-This low-pass view is consistent with analyses of smoothing and depth in graph convolutional models \cite{li2018deeper,oono2020graph}.
+Their filtering interpretation follows graph signal processing and localized spectral convolution \cite{hammond2011wavelets,shuman2013emerging,defferrard2016convolutional,ortega2018graph}.
+They are strong when connected nodes tend to share labels, but neighborhood aggregation often behaves as a low-pass filter that can over- or mis-smooth under heterophily \cite{nt2019revisiting,li2018deeper,oono2020graph,rong2020dropedge,chen2020simple,yan2022two}.
 
 \paragraph{GNNs beyond homophily.}
 MixHop \cite{abu2019mixhop} concatenates multiple adjacency powers.
 H2GCN \cite{zhu2020beyond} separates ego and higher-order neighborhood information.
 GPR-GNN \cite{chien2021gprgnn}, FAGCN \cite{bo2021beyond}, and BernNet \cite{he2021bernnet} learn flexible spectral or frequency-aware filters.
 LINKX \cite{lim2021large} shows that simple feature and adjacency encoders can be competitive on non-homophilous graphs.
+ACM, GloGNN, label-wise propagation, and neural sheaf diffusion broaden this space through adaptive channels, global aggregation, label-conditioned messages, and learned transport \cite{luan2022revisiting,li2022global,dai2022labelwise,bodnar2022neural}.
+Spectral support and polynomial-basis analyses further motivate richer frequency responses \cite{balcilar2021breaking,wang2022spectral}.
 Our work is closest in spirit to this family, but focuses on a compact residual high-pass basis and on validation-calibrated selection between two structural priors.
 
 \paragraph{Evaluation under heterophily.}
-Heterophily benchmarks are sensitive to split protocol, metric choice, and baseline coverage \cite{pei2020geomgcn,lim2021large,platonov2023critical}.
+Graph benchmarks are sensitive to split protocol, metric choice, and baseline coverage \cite{shchur2018pitfalls,pei2020geomgcn,lim2021large,platonov2023critical}.
 We therefore treat fixed-split paired comparisons and result audits as part of the method contribution.
 This emphasis treats statistical auditability as part of the model design rather than as a post-hoc reporting detail.
 
@@ -582,35 +584,35 @@ Figure~\ref{fig:selector-sensitivity} further shows that increasing the confiden
 \begin{figure}[!b]
 \centering
 \IfFileExists{figures/selector_audit.pdf}{
-  \includegraphics[width=\linewidth]{figures/selector_audit.pdf}
+  \includegraphics[width=0.87\linewidth]{figures/selector_audit.pdf}
 }{
-  \includegraphics[width=\linewidth]{figures/selector_audit.png}
+  \includegraphics[width=0.87\linewidth]{figures/selector_audit.png}
 }
-\caption{Selector audit over eight accuracy datasets (10 splits each). Positive validation surplus triggers \esep; the test difference is inspected only after routing. Blue retains \base, green selects \esep, and diamonds denote means.}
+\caption{Split-level selector audit over eight accuracy datasets. Positive validation surplus triggers \esep; test advantage is inspected only after routing. Diamonds denote means.}
 \label{fig:selector-audit}
 \end{figure}
 
 \begin{figure}[!b]
 \centering
 \IfFileExists{figures/selector_sensitivity.pdf}{
-  \includegraphics[width=\linewidth]{figures/selector_sensitivity.pdf}
+  \includegraphics[width=0.87\linewidth]{figures/selector_sensitivity.pdf}
 }{
-  \includegraphics[width=\linewidth]{figures/selector_sensitivity.png}
+  \includegraphics[width=0.87\linewidth]{figures/selector_sensitivity.png}
 }
-\caption{Post-hoc sensitivity of the frozen selector over all 80 accuracy splits. The submitted operating point is $z=1.96$; the sweep is diagnostic and does not retune reported results.}
+\caption{Post-hoc sensitivity over 80 accuracy splits. The submitted $z=1.96$ point is frozen; the sweep is diagnostic only.}
 \label{fig:selector-sensitivity}
 \end{figure}
 
 \section{Conclusion}
 
 \method{} treats heterophilous graph learning as a validation-calibrated choice between residual polynomial experts rather than a commitment to one universal filter.
-The self-loop expert is useful on WebKB, the ego-separated expert repairs Chameleon and Squirrel failures and improves Roman-Empire, and the frozen selector routes between them without test labels.
+The self-loop expert is useful on WebKB; the ego-separated expert repairs Chameleon and Squirrel failures and improves Roman-Empire; the frozen selector routes without test labels.
 Split-level audits distinguish decisive switches from borderline cases, while the threshold sweep shows that $z=1.96$ is a conservative low-regret operating point rather than a test-tuned optimum.
-The evidence is deliberately bounded: it supports an auditable specialist-and-routing formulation, not universal leaderboard dominance.
-Stronger official baselines, richer expert libraries, and cheaper selectors are the next tests, and should retain the same pre-test decision and paired-evidence protocol.
+The evidence is deliberately bounded and supports this auditable specialist-and-routing formulation.
 
 \clearpage
 \typeout{HARP_REFERENCES_START_PAGE=\thepage}
+\raggedbottom
 \bibliography{references,references_additions}
 
 \end{document}
