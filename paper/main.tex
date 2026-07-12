@@ -125,7 +125,7 @@ Figure~\ref{fig:select-framework} summarizes the two-expert training and validat
     \fbox{\rule{0pt}{1.5in}\rule{0.95\textwidth}{0pt}}
   }
 }
-\caption{\method{} framework. Two residual polynomial experts are trained with the same split and optimization budget. The routing rule uses validation accuracy only and is fixed across datasets; test labels are evaluated only after the branch decision has been made.}
+\caption{\method{} at a glance. A fixed graph split feeds two structural experts trained with identical labels and budgets. Blue retains self-information; green separates the ego path. Their validation scores are compared by the frozen rule $a_E-a_H>1.96\,\mathrm{SE}$, after which one branch is locked and evaluated once on test labels.}
 \label{fig:select-framework}
 \end{figure*}
 
@@ -613,6 +613,9 @@ The evidence is deliberately bounded and supports this auditable specialist-and-
 \clearpage
 \typeout{HARP_REFERENCES_START_PAGE=\thepage}
 \raggedbottom
+\begingroup
+\small
 \bibliography{references,references_additions}
+\endgroup
 
 \end{document}

@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Rectangle
+from matplotlib.patches import Arc, Circle, FancyArrowPatch, FancyBboxPatch, Rectangle
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,485 +20,423 @@ plt.rcParams.update(
 )
 
 
-COLORS = {
-    "ink": "#1f2933",
-    "muted": "#5b6770",
-    "panel": "#f7f8fa",
-    "blue_fill": "#e7f0fb",
-    "blue_edge": "#2f5f99",
-    "green_fill": "#e7f4ed",
-    "green_edge": "#3b7c59",
-    "gold_fill": "#fff1c7",
-    "gold_edge": "#8a6b1f",
-    "purple_fill": "#f0eafa",
-    "purple_edge": "#66508a",
-    "red_fill": "#f8e8e6",
-    "red_edge": "#93463f",
+C = {
+    "ink": "#202a35",
+    "muted": "#5e6a75",
+    "line": "#cfd6dd",
+    "data_bg": "#f5f7f9",
+    "train_bg": "#f4f7fb",
+    "route_bg": "#fffaf0",
+    "test_bg": "#f8f5fc",
+    "blue": "#2b63a0",
+    "blue_soft": "#e4eef9",
+    "green": "#3a7f5a",
+    "green_soft": "#e5f2ea",
+    "red": "#9a463f",
+    "red_soft": "#f7e8e6",
+    "gold": "#8c6a17",
+    "gold_soft": "#fff0bd",
+    "purple": "#684f8d",
+    "purple_soft": "#eee8f8",
+    "white": "#ffffff",
 }
 
 
-def _rounded_box(
+def rounded(
     ax: plt.Axes,
     x: float,
     y: float,
     w: float,
     h: float,
     *,
-    title: str,
-    body: str = "",
-    facecolor: str,
-    edgecolor: str,
-    title_size: float = 6.6,
-    body_size: float = 6.0,
-    linewidth: float = 0.9,
-    radius: float = 0.045,
-) -> None:
+    face: str,
+    edge: str,
+    lw: float = 0.9,
+    radius: float = 0.05,
+    z: int = 2,
+) -> FancyBboxPatch:
     patch = FancyBboxPatch(
         (x, y),
         w,
         h,
         boxstyle=f"round,pad=0.018,rounding_size={radius}",
-        linewidth=linewidth,
-        edgecolor=edgecolor,
-        facecolor=facecolor,
-        zorder=2,
+        facecolor=face,
+        edgecolor=edge,
+        linewidth=lw,
+        zorder=z,
     )
     ax.add_patch(patch)
-    if title:
-        ax.text(
-            x + w / 2,
-            y + h - 0.13,
-            title,
-            ha="center",
-            va="top",
-            fontsize=title_size,
-            fontweight="bold",
-            color=COLORS["ink"],
-            zorder=3,
-        )
-    if body:
-        body_y = y + h / 2 - (0.11 if title else 0.0)
-        ax.text(
-            x + w / 2,
-            body_y,
-            body,
-            ha="center",
-            va="center",
-            fontsize=body_size,
-            color=COLORS["ink"],
-            linespacing=1.06,
-            zorder=3,
-        )
+    return patch
 
 
-def _arrow(
+def arrow(
     ax: plt.Axes,
     start: tuple[float, float],
     end: tuple[float, float],
     *,
-    color: str = "#333333",
+    color: str,
+    lw: float = 1.1,
     rad: float = 0.0,
-    linewidth: float = 0.95,
-    mutation_scale: float = 9.0,
-    linestyle: str = "-",
+    ms: float = 9.0,
+    style: str = "-",
+    z: int = 8,
 ) -> None:
     ax.add_patch(
         FancyArrowPatch(
             start,
             end,
             arrowstyle="-|>",
-            mutation_scale=mutation_scale,
-            linewidth=linewidth,
-            linestyle=linestyle,
-            color=color,
             connectionstyle=f"arc3,rad={rad}",
-            shrinkA=4,
-            shrinkB=4,
-            zorder=7,
+            color=color,
+            linewidth=lw,
+            linestyle=style,
+            mutation_scale=ms,
+            shrinkA=3,
+            shrinkB=3,
+            zorder=z,
         )
     )
 
 
-def _stage_header(ax: plt.Axes, x0: float, x1: float, label: str, subtitle: str) -> None:
+def stage_header(
+    ax: plt.Axes,
+    x0: float,
+    x1: float,
+    number: int,
+    title: str,
+    subtitle: str,
+    color: str,
+) -> None:
+    badge_x = x0 + 0.16
+    text_x = x0 + 0.38
+    ax.add_patch(Circle((badge_x, 5.02), 0.105, facecolor=color, edgecolor="none", zorder=5))
     ax.text(
-        (x0 + x1) / 2,
-        5.08,
-        label.upper(),
+        badge_x,
+        5.02,
+        str(number),
         ha="center",
         va="center",
-        fontsize=7.4,
+        fontsize=6.4,
+        color=C["white"],
         fontweight="bold",
-        color=COLORS["ink"],
+        zorder=6,
     )
     ax.text(
-        (x0 + x1) / 2,
-        4.86,
-        subtitle,
-        ha="center",
+        text_x,
+        5.04,
+        title.upper(),
+        ha="left",
         va="center",
-        fontsize=6.3,
-        color=COLORS["muted"],
+        fontsize=7.45,
+        color=C["ink"],
+        fontweight="bold",
+        zorder=5,
+    )
+    ax.text(
+        text_x,
+        4.79,
+        subtitle,
+        ha="left",
+        va="center",
+        fontsize=6.25,
+        color=C["muted"],
+        zorder=5,
     )
 
 
-def _graph_icon(
+def graph_icon(
     ax: plt.Axes,
     cx: float,
     cy: float,
     *,
-    scale: float = 1.0,
-    edgecolor: str = "#9aa5af",
+    scale: float,
+    color: str = "#7d8994",
     self_loops: bool = False,
-    no_center_fill: bool = False,
 ) -> None:
     nodes = [
-        (cx - 0.33 * scale, cy + 0.23 * scale),
-        (cx + 0.08 * scale, cy + 0.33 * scale),
-        (cx + 0.33 * scale, cy - 0.02 * scale),
-        (cx - 0.06 * scale, cy - 0.25 * scale),
-        (cx - 0.42 * scale, cy - 0.12 * scale),
+        (cx - 0.34 * scale, cy + 0.19 * scale),
+        (cx + 0.08 * scale, cy + 0.31 * scale),
+        (cx + 0.35 * scale, cy + 0.02 * scale),
+        (cx + 0.02 * scale, cy - 0.30 * scale),
+        (cx - 0.36 * scale, cy - 0.16 * scale),
     ]
-    edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0), (1, 3), (0, 3)]
+    edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0), (0, 3), (1, 3)]
     for i, j in edges:
-        x0, y0 = nodes[i]
-        x1, y1 = nodes[j]
-        ax.plot([x0, x1], [y0, y1], color=edgecolor, linewidth=0.75, zorder=4)
-    node_colors = ["#dbeafe", "#dcfce7", "#fee2e2", "#ede9fe", "#fef3c7"]
-    if no_center_fill:
-        node_colors[3] = "#ffffff"
-    for idx, ((x, y), c) in enumerate(zip(nodes, node_colors)):
-        radius = 0.07 * scale if idx != 3 else 0.082 * scale
-        ax.add_patch(Circle((x, y), radius, facecolor=c, edgecolor="#4b5563", linewidth=0.55, zorder=5))
-        if self_loops and idx in [1, 3]:
-            ax.add_patch(Circle((x, y), radius * 1.65, facecolor="none", edgecolor=edgecolor, linewidth=0.55, zorder=4))
+        ax.plot(
+            [nodes[i][0], nodes[j][0]],
+            [nodes[i][1], nodes[j][1]],
+            color=color,
+            linewidth=0.78,
+            alpha=0.76,
+            zorder=4,
+        )
+    fills = ["#dbeafe", "#dcfce7", "#fee2e2", "#ede9fe", "#fef3c7"]
+    for idx, ((x, y), fill) in enumerate(zip(nodes, fills)):
+        r = 0.073 * scale
+        ax.add_patch(Circle((x, y), r, facecolor=fill, edgecolor=color, linewidth=0.62, zorder=5))
+        if self_loops and idx in (1, 3):
+            ax.add_patch(Arc((x, y), 0.22 * scale, 0.20 * scale, theta1=20, theta2=325, color=color, lw=0.65, zorder=4))
 
 
-def _mask_strip(ax: plt.Axes, x: float, y: float, w: float) -> None:
-    colors = [COLORS["blue_edge"], COLORS["gold_edge"], COLORS["purple_edge"]]
+def split_card(ax: plt.Axes) -> None:
+    rounded(ax, 0.40, 1.08, 1.40, 2.92, face=C["white"], edge="#53606c", lw=0.95)
+    ax.text(1.10, 3.79, "Fixed split", ha="center", va="center", fontsize=7.4, fontweight="bold", color=C["ink"], zorder=6)
+    graph_icon(ax, 1.10, 3.12, scale=0.94)
+    ax.text(1.10, 2.40, r"$G=(V,E),\;X$", ha="center", va="center", fontsize=7.2, color=C["ink"], zorder=6)
+    ax.text(1.10, 2.14, r"$Y_{\rm tr},\;Y_{\rm val}$", ha="center", va="center", fontsize=7.2, color=C["ink"], zorder=6)
+
+    x0, y0, w = 0.68, 1.55, 0.84
+    colors = [C["blue"], C["gold"], C["purple"]]
     labels = ["train", "val", "test"]
     for i, (color, label) in enumerate(zip(colors, labels)):
-        x0 = x + i * w / 3
-        ax.add_patch(Rectangle((x0, y), w / 3 - 0.02, 0.08, facecolor=color, edgecolor="none", zorder=5))
-        ax.text(x0 + w / 6, y - 0.07, label, ha="center", va="top", fontsize=5.1, color=COLORS["muted"], zorder=5)
+        left = x0 + i * w / 3
+        ax.add_patch(Rectangle((left, y0), w / 3 - 0.018, 0.09, facecolor=color, edgecolor="none", zorder=5))
+        ax.text(left + w / 6, y0 - 0.08, label, ha="center", va="top", fontsize=5.15, color=C["muted"], zorder=6)
+    ax.text(1.10, 1.22, "shared masks", ha="center", va="center", fontsize=5.7, color=C["muted"], zorder=6)
 
 
-def _tiny_filter(ax: plt.Axes, x: float, y: float, w: float, h: float, *, mode: str) -> None:
-    ax.plot([x, x + w], [y, y], color="#d2d8df", linewidth=0.55, zorder=5)
-    ax.plot([x, x], [y, y + h], color="#d2d8df", linewidth=0.55, zorder=5)
-    xs = [x + w * t / 24 for t in range(25)]
-    if mode == "low":
-        ys = [y + h * (0.82 - 0.52 * (t / 24) ** 1.25) for t in range(25)]
-        color = COLORS["blue_edge"]
-    elif mode == "residual":
-        ys = [y + h * (0.30 + 0.50 * (t / 24) ** 1.2) for t in range(25)]
-        color = COLORS["red_edge"]
+def lane_header(ax: plt.Axes, x: float, y: float, expert: str, name: str, prior: str, color: str) -> None:
+    ax.add_patch(Circle((x, y), 0.145, facecolor=C["white"], edgecolor=color, linewidth=1.0, zorder=6))
+    ax.text(x, y, expert, ha="center", va="center", fontsize=6.8, fontweight="bold", color=color, zorder=7)
+    ax.text(x + 0.23, y + 0.02, name, ha="left", va="center", fontsize=7.4, fontweight="bold", color=color, zorder=7)
+    ax.text(x + 1.76, y + 0.02, prior, ha="left", va="center", fontsize=6.0, color=C["muted"], zorder=7)
+
+
+def self_prior_icon(ax: plt.Axes, cx: float, cy: float) -> None:
+    graph_icon(ax, cx + 0.08, cy + 0.05, scale=0.58, color=C["blue"], self_loops=True)
+    ax.add_patch(Circle((cx - 0.40, cy + 0.24), 0.145, facecolor=C["white"], edgecolor=C["blue"], linewidth=0.9, zorder=7))
+    ax.text(cx - 0.40, cy + 0.24, r"$+I$", ha="center", va="center", fontsize=7.1, color=C["blue"], fontweight="bold", zorder=8)
+
+
+def ego_prior_icon(ax: plt.Axes, cx: float, cy: float) -> None:
+    ego_x = cx - 0.36
+    ax.add_patch(Circle((ego_x, cy + 0.03), 0.12, facecolor=C["white"], edgecolor=C["green"], linewidth=1.0, zorder=7))
+    ax.text(ego_x, cy + 0.03, "ego", ha="center", va="center", fontsize=4.8, color=C["green"], fontweight="bold", zorder=8)
+    neighbors = [(cx + 0.04, cy + 0.30), (cx + 0.36, cy + 0.05), (cx + 0.20, cy - 0.30), (cx - 0.10, cy - 0.18)]
+    for i, (x0, y0) in enumerate(neighbors):
+        x1, y1 = neighbors[(i + 1) % len(neighbors)]
+        ax.plot([x0, x1], [y0, y1], color="#8fb9a1", linewidth=0.8, zorder=4)
+    for x, y in neighbors:
+        ax.add_patch(Circle((x, y), 0.075, facecolor=C["green_soft"], edgecolor=C["green"], linewidth=0.7, zorder=6))
+    ax.plot([ego_x + 0.13, cx - 0.18], [cy + 0.03, cy + 0.03], color=C["green"], linewidth=0.85, linestyle=(0, (2, 2)), zorder=5)
+    ax.add_patch(Circle((cx - 0.39, cy + 0.31), 0.13, facecolor=C["white"], edgecolor=C["green"], linewidth=0.9, zorder=7))
+    ax.text(cx - 0.39, cy + 0.31, r"$-I$", ha="center", va="center", fontsize=6.8, color=C["green"], fontweight="bold", zorder=8)
+
+
+def filter_icon(ax: plt.Axes, cx: float, cy: float, *, color: str, no_self: bool) -> None:
+    rounded(ax, cx - 0.58, cy - 0.34, 1.16, 0.68, face=C["white"], edge=color, lw=0.78, radius=0.035, z=3)
+    ax.plot([cx - 0.42, cx - 0.42], [cy - 0.14, cy + 0.18], color=C["line"], lw=0.6, zorder=4)
+    ax.plot([cx - 0.42, cx + 0.42], [cy - 0.14, cy - 0.14], color=C["line"], lw=0.6, zorder=4)
+    if no_self:
+        ax.plot([cx - 0.37, cx - 0.06, cx + 0.14, cx + 0.38], [cy - 0.02, cy + 0.08, cy + 0.17, cy - 0.01], color=C["green"], lw=1.35, zorder=6)
+        ax.plot([cx - 0.22, cx - 0.05], [cy + 0.21, cy + 0.21], color=C["green"], lw=1.4, zorder=6)
+        ax.plot([cx + 0.09, cx + 0.26], [cy + 0.21, cy + 0.21], color=C["red"], lw=1.4, zorder=6)
     else:
-        ys = [y + h * (0.28 + 0.50 * (1 - abs(2 * t / 24 - 1))) for t in range(25)]
-        color = COLORS["green_edge"]
-    ax.plot(xs, ys, color=color, linewidth=1.0, zorder=6)
+        ax.plot([cx - 0.36, cx - 0.12], [cy + 0.13, cy + 0.02], color=C["blue"], lw=1.4, zorder=6)
+        ax.plot([cx + 0.08, cx + 0.37], [cy - 0.01, cy + 0.17], color=C["red"], lw=1.4, zorder=6)
 
 
-def _filter_bank_card(ax: plt.Axes, x: float, y: float, edge: str) -> None:
-    _rounded_box(
-        ax,
-        x,
-        y,
-        1.42,
-        0.72,
-        title="filter bank",
-        facecolor="#ffffff",
-        edgecolor=edge,
-        title_size=5.8,
-    )
-    _tiny_filter(ax, x + 0.17, y + 0.15, 0.43, 0.28, mode="low")
-    _tiny_filter(ax, x + 0.81, y + 0.15, 0.43, 0.28, mode="residual")
-    ax.text(x + 0.38, y + 0.05, "low", ha="center", va="top", fontsize=5.2, color=COLORS["blue_edge"], zorder=6)
-    ax.text(x + 1.03, y + 0.05, "res.", ha="center", va="top", fontsize=5.2, color=COLORS["red_edge"], zorder=6)
+def gate_icon(ax: plt.Axes, cx: float, cy: float) -> None:
+    ax.add_patch(Circle((cx - 0.16, cy + 0.04), 0.28, facecolor=C["blue_soft"], edgecolor=C["blue"], linewidth=0.9, zorder=4))
+    ax.add_patch(Circle((cx + 0.16, cy + 0.04), 0.28, facecolor=C["red_soft"], edgecolor=C["red"], linewidth=0.9, alpha=0.95, zorder=4))
+    ax.add_patch(Circle((cx, cy + 0.04), 0.09, facecolor=C["white"], edgecolor=C["blue"], linewidth=0.9, zorder=6))
+    ax.plot([cx, cx + 0.36], [cy + 0.04, cy + 0.25], color=C["blue"], linewidth=1.15, zorder=7)
 
 
-def _gate_card(ax: plt.Axes, x: float, y: float, edge: str) -> None:
-    _rounded_box(
-        ax,
-        x,
-        y,
-        1.22,
-        0.72,
-        title="node gate",
-        body=r"$g_i$ blends",
-        facecolor="#ffffff",
-        edgecolor=edge,
-        title_size=5.8,
-        body_size=5.6,
-    )
-    ax.add_patch(Rectangle((x + 0.23, y + 0.13), 0.76, 0.07, facecolor="#e5e7eb", edgecolor="#c7ced6", linewidth=0.35, zorder=5))
-    ax.add_patch(Rectangle((x + 0.23, y + 0.13), 0.45, 0.07, facecolor=edge, edgecolor="none", zorder=6))
-    ax.add_patch(Circle((x + 0.68, y + 0.165), 0.06, facecolor="#ffffff", edgecolor=edge, linewidth=0.7, zorder=7))
+def residual_fusion_icon(ax: plt.Axes, cx: float, cy: float) -> None:
+    ax.add_patch(Rectangle((cx - 0.43, cy - 0.23), 0.42, 0.46, facecolor=C["white"], edgecolor=C["green"], linewidth=0.85, zorder=4))
+    ax.add_patch(Rectangle((cx + 0.01, cy - 0.23), 0.42, 0.46, facecolor=C["green_soft"], edgecolor=C["green"], linewidth=0.85, zorder=4))
+    ax.text(cx - 0.22, cy, r"$B_0$", ha="center", va="center", fontsize=8.2, color=C["ink"], zorder=6)
+    ax.text(cx + 0.22, cy, r"$U$", ha="center", va="center", fontsize=8.2, color=C["ink"], zorder=6)
+    ax.plot([cx - 0.49, cx - 0.56, cx - 0.56, cx - 0.49], [cy + 0.29, cy + 0.29, cy - 0.29, cy - 0.29], color=C["green"], linewidth=1.0, zorder=6)
+    ax.plot([cx + 0.49, cx + 0.56, cx + 0.56, cx + 0.49], [cy + 0.29, cy + 0.29, cy - 0.29, cy - 0.29], color=C["green"], linewidth=1.0, zorder=6)
 
 
-def _score_card(ax: plt.Axes, x: float, y: float, label: str, score: str, edge: str) -> None:
-    _rounded_box(
-        ax,
-        x,
-        y,
-        0.96,
-        0.72,
-        title=label,
-        body=score + "\nval score",
-        facecolor="#ffffff",
-        edgecolor=edge,
-        title_size=5.5,
-        body_size=5.4,
-    )
+def score_card(ax: plt.Axes, cx: float, cy: float, *, name: str, score: str, color: str) -> None:
+    rounded(ax, cx - 0.51, cy - 0.36, 1.02, 0.72, face=C["white"], edge=color, lw=0.82, radius=0.035, z=3)
+    ax.text(cx, cy + 0.19, name, ha="center", va="center", fontsize=6.4, fontweight="bold", color=color, zorder=6)
+    ax.plot([cx - 0.27, cx + 0.27], [cy - 0.03, cy - 0.03], color="#d7dde3", linewidth=2.6, solid_capstyle="round", zorder=5)
+    ax.plot([cx - 0.27, cx + 0.08], [cy - 0.03, cy - 0.03], color=color, linewidth=2.6, solid_capstyle="round", zorder=6)
+    ax.add_patch(Circle((cx + 0.08, cy - 0.03), 0.052, facecolor=C["white"], edgecolor=color, linewidth=0.8, zorder=7))
+    ax.text(cx, cy - 0.23, score + " on validation", ha="center", va="center", fontsize=5.55, color=C["muted"], zorder=6)
 
 
-def _router_card(ax: plt.Axes) -> None:
-    _rounded_box(
-        ax,
-        8.86,
-        1.42,
-        2.34,
-        2.24,
-        title="Confidence router",
-        facecolor=COLORS["gold_fill"],
-        edgecolor=COLORS["gold_edge"],
-        title_size=6.8,
-        linewidth=1.0,
-    )
+def expert_lane(
+    ax: plt.Axes,
+    *,
+    y: float,
+    expert: str,
+    name: str,
+    prior: str,
+    color: str,
+    soft: str,
+    ego_separated: bool,
+) -> None:
+    x, w, h = 2.42, 6.78, 1.46
+    rounded(ax, x, y, w, h, face=soft, edge=color, lw=0.95, radius=0.055, z=1)
+    lane_header(ax, 2.72, y + h - 0.22, expert, name, prior, color)
+
+    cy = y + 0.60
+    xs = [3.52, 5.15, 6.83, 8.48]
+    if ego_separated:
+        ego_prior_icon(ax, xs[0], cy)
+        filter_icon(ax, xs[1], cy, color=color, no_self=True)
+        residual_fusion_icon(ax, xs[2], cy)
+        captions = ["ego-separated prior", "no-self residual filters", "explicit ego fusion"]
+        score_card(ax, xs[3], cy, name="HARP-ESep", score=r"$a_E$", color=color)
+    else:
+        self_prior_icon(ax, xs[0], cy)
+        filter_icon(ax, xs[1], cy, color=color, no_self=False)
+        gate_icon(ax, xs[2], cy)
+        captions = ["self-loop prior", "low + residual filters", "node-wise gate"]
+        score_card(ax, xs[3], cy, name="HARP-GNN", score=r"$a_H$", color=color)
+
+    for cx, label in zip(xs[:3], captions):
+        ax.text(cx, y + 0.12, label, ha="center", va="center", fontsize=5.55, color=C["ink"], zorder=7)
+    for a, b in zip(xs[:-1], xs[1:]):
+        arrow(ax, (a + 0.59, cy), (b - 0.60, cy), color=color, lw=1.05, ms=8.2)
+
+
+def router_card(ax: plt.Axes) -> None:
+    x, y, w, h = 9.74, 1.03, 2.92, 3.24
+    rounded(ax, x, y, w, h, face=C["gold_soft"], edge=C["gold"], lw=1.0, radius=0.06, z=2)
+    ax.text(x + w / 2, y + h - 0.23, "Validation-only selector", ha="center", va="center", fontsize=7.5, fontweight="bold", color=C["ink"], zorder=6)
+
+    # Two aligned score bars make the compared evidence explicit.
+    bar_x0, bar_x1 = x + 0.84, x + 2.36
+    for yy in (y + 2.52, y + 2.16):
+        ax.plot([bar_x0, bar_x1], [yy, yy], color="#ded7bd", linewidth=4.0, solid_capstyle="round", zorder=4)
+    ax.text(x + 0.43, y + 2.52, r"$a_H$", ha="center", va="center", fontsize=7.2, color=C["blue"], fontweight="bold", zorder=6)
+    ax.text(x + 0.43, y + 2.16, r"$a_E$", ha="center", va="center", fontsize=7.2, color=C["green"], fontweight="bold", zorder=6)
+    ax.plot([bar_x0, x + 1.72], [y + 2.52, y + 2.52], color=C["blue"], linewidth=4.0, solid_capstyle="round", zorder=5)
+    ax.plot([bar_x0, x + 2.09], [y + 2.16, y + 2.16], color=C["green"], linewidth=4.0, solid_capstyle="round", zorder=5)
+    ax.add_patch(Circle((x + 1.72, y + 2.52), 0.058, facecolor=C["white"], edgecolor=C["blue"], linewidth=0.85, zorder=7))
+    ax.add_patch(Circle((x + 2.09, y + 2.16), 0.058, facecolor=C["white"], edgecolor=C["green"], linewidth=0.85, zorder=7))
+
+    ax.text(x + w / 2, y + 1.75, r"$\Delta_{\rm val}=a_E-a_H$", ha="center", va="center", fontsize=8.3, color=C["ink"], zorder=6)
+
+    axis_left, axis_right, axis_y = x + 0.48, x + 2.44, y + 1.22
+    tau_x = x + 1.46
+    ax.add_patch(Rectangle((axis_left, axis_y - 0.11), tau_x - axis_left, 0.22, facecolor=C["blue_soft"], edgecolor="none", zorder=3))
+    ax.add_patch(Rectangle((tau_x, axis_y - 0.11), axis_right - tau_x, 0.22, facecolor=C["green_soft"], edgecolor="none", zorder=3))
+    ax.plot([axis_left, axis_right], [axis_y, axis_y], color=C["gold"], linewidth=1.15, zorder=5)
+    ax.plot([tau_x, tau_x], [axis_y - 0.19, axis_y + 0.21], color=C["gold"], linewidth=0.95, linestyle=(0, (2, 2)), zorder=6)
+    ax.text(x + 0.92, axis_y + 0.22, "retain H", ha="center", va="bottom", fontsize=5.8, color=C["blue"], fontweight="bold", zorder=6)
+    ax.text(x + 2.03, axis_y + 0.22, "select E", ha="center", va="bottom", fontsize=5.8, color=C["green"], fontweight="bold", zorder=6)
+    ax.text(tau_x, axis_y - 0.25, r"$\tau=1.96\,\mathrm{SE}$", ha="center", va="top", fontsize=6.2, color=C["gold"], zorder=6)
     ax.text(
-        10.03,
-        2.78,
-        r"$\Delta_{\mathrm{val}}=a_E-a_H$",
+        x + w / 2,
+        y + 0.38,
+        r"switch only if $\Delta_{\rm val}>\tau$",
         ha="center",
         va="center",
-        fontsize=7.2,
-        color=COLORS["ink"],
-        zorder=5,
-    )
-    ax.plot([9.23, 10.83], [2.37, 2.37], color=COLORS["gold_edge"], linewidth=1.0, zorder=5)
-    ax.add_patch(Rectangle((9.23, 2.27), 0.75, 0.20, facecolor="#f8e8e6", edgecolor="none", alpha=0.80, zorder=4))
-    ax.add_patch(Rectangle((9.98, 2.27), 0.85, 0.20, facecolor="#e7f4ed", edgecolor="none", alpha=0.85, zorder=4))
-    ax.plot([9.98, 9.98], [2.20, 2.54], color=COLORS["gold_edge"], linewidth=0.85, linestyle=(0, (2, 2)), zorder=6)
-    ax.text(9.98, 2.07, r"$1.96SE$", ha="center", va="top", fontsize=5.8, color=COLORS["gold_edge"], zorder=6)
-    ax.add_patch(Circle((10.34, 2.37), 0.07, facecolor=COLORS["green_edge"], edgecolor="#ffffff", linewidth=0.45, zorder=7))
-    ax.text(10.03, 1.76, "switch only with\nclear validation evidence", ha="center", va="center", fontsize=6.15, color=COLORS["ink"], linespacing=1.05, zorder=5)
-    _rounded_box(
-        ax,
-        9.32,
-        0.66,
-        1.50,
-        0.46,
-        title="",
-        body="freeze before test",
-        facecolor="#ffffff",
-        edgecolor=COLORS["gold_edge"],
-        body_size=6.0,
+        fontsize=6.4,
+        color=C["ink"],
+        fontweight="bold",
+        zorder=6,
     )
 
 
-def _locked_card(ax: plt.Axes) -> None:
-    _rounded_box(
-        ax,
-        11.92,
-        1.58,
-        1.18,
-        1.96,
-        title="Locked expert",
-        body="test score\n+ oracle regret",
-        facecolor=COLORS["purple_fill"],
-        edgecolor=COLORS["purple_edge"],
-        title_size=6.4,
-        body_size=5.9,
-    )
-    # Simple lock icon.
-    ax.add_patch(Rectangle((12.36, 2.80), 0.26, 0.23, facecolor="#ffffff", edgecolor=COLORS["purple_edge"], linewidth=0.75, zorder=6))
-    ax.add_patch(
-        FancyBboxPatch(
-            (12.39, 2.98),
-            0.20,
-            0.18,
-            boxstyle="round,pad=0.002,rounding_size=0.055",
-            facecolor="none",
-            edgecolor=COLORS["purple_edge"],
-            linewidth=0.75,
-            zorder=6,
-        )
-    )
-    _rounded_box(
-        ax,
-        11.88,
-        0.76,
-        1.24,
-        0.48,
-        title="",
-        body="test labels\nnever route",
-        facecolor="#ffffff",
-        edgecolor=COLORS["purple_edge"],
-        body_size=5.85,
-    )
+def lock_icon(ax: plt.Axes, cx: float, cy: float) -> None:
+    ax.add_patch(Rectangle((cx - 0.18, cy - 0.20), 0.36, 0.32, facecolor=C["white"], edgecolor=C["purple"], linewidth=1.05, zorder=6))
+    ax.add_patch(Arc((cx, cy + 0.12), 0.30, 0.34, theta1=0, theta2=180, color=C["purple"], linewidth=1.15, zorder=6))
+    ax.add_patch(Circle((cx, cy - 0.04), 0.035, facecolor=C["purple"], edgecolor="none", zorder=7))
+
+
+def test_card(ax: plt.Axes) -> None:
+    x, y, w, h = 13.18, 1.18, 1.53, 2.74
+    rounded(ax, x, y, w, h, face=C["purple_soft"], edge=C["purple"], lw=1.0, radius=0.055, z=2)
+    ax.text(x + w / 2, y + h - 0.25, "Frozen expert", ha="center", va="center", fontsize=7.2, fontweight="bold", color=C["ink"], zorder=6)
+
+    token_y = y + 1.97
+    for xx, label, color, soft in [
+        (x + 0.44, "H", C["blue"], C["blue_soft"]),
+        (x + 1.09, "E", C["green"], C["green_soft"]),
+    ]:
+        ax.add_patch(Circle((xx, token_y), 0.15, facecolor=soft, edgecolor=color, linewidth=0.9, zorder=6))
+        ax.text(xx, token_y, label, ha="center", va="center", fontsize=6.7, color=color, fontweight="bold", zorder=7)
+        arrow(ax, (xx, token_y - 0.14), (x + w / 2, y + 1.49), color=C["purple"], lw=0.75, ms=6.8)
+    lock_icon(ax, x + w / 2, y + 1.27)
+    arrow(ax, (x + w / 2, y + 1.00), (x + w / 2, y + 0.65), color=C["purple"], lw=0.9, ms=7.0)
+    ax.text(x + w / 2, y + 0.39, "test score\n+ oracle regret", ha="center", va="center", fontsize=6.05, color=C["ink"], linespacing=1.0, zorder=6)
+
+    # Test labels cannot feed back into selection.
+    back_y = 0.76
+    ax.plot([14.60, 12.93], [back_y, back_y], color=C["red"], linewidth=0.9, linestyle=(0, (3, 2)), zorder=5)
+    arrow(ax, (14.60, back_y), (12.95, back_y), color=C["red"], lw=0.9, ms=7.2, style=(0, (3, 2)))
+    cross_x = 13.62
+    ax.plot([cross_x - 0.09, cross_x + 0.09], [back_y - 0.12, back_y + 0.12], color=C["red"], linewidth=1.5, zorder=8)
+    ax.plot([cross_x - 0.09, cross_x + 0.09], [back_y + 0.12, back_y - 0.12], color=C["red"], linewidth=1.5, zorder=8)
+    ax.text(13.95, 0.47, "test labels never route", ha="center", va="center", fontsize=5.9, color=C["red"], fontweight="bold", zorder=6)
 
 
 def plot_framework(output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(8.40, 3.40), dpi=400)
-    ax.set_xlim(0, 13.55)
-    ax.set_ylim(0, 5.35)
+    fig, ax = plt.subplots(figsize=(8.55, 3.02), dpi=420)
+    ax.set_xlim(0, 15.10)
+    ax.set_ylim(0.24, 5.25)
     ax.axis("off")
 
     stages = [
-        (0.20, 2.05, "data split", r"$G,X,Y_{\mathrm{train}},Y_{\mathrm{val}}$"),
-        (2.20, 8.45, "expert training", "same split, same budget"),
-        (8.60, 11.55, "routing", "validation labels only"),
-        (11.72, 13.35, "test", "after branch lock"),
+        (0.14, 2.06, 1, "data split", r"one graph, fixed masks", C["muted"], C["data_bg"]),
+        (2.22, 9.42, 2, "parallel experts", "two structural priors, same budget", C["blue"], C["train_bg"]),
+        (9.58, 12.84, 3, "confidence routing", "validation evidence only", C["gold"], C["route_bg"]),
+        (13.02, 14.92, 4, "locked test", "one final evaluation", C["purple"], C["test_bg"]),
     ]
-    for x0, x1, label, subtitle in stages:
-        ax.add_patch(
-            Rectangle(
-                (x0, 0.25),
-                x1 - x0,
-                4.45,
-                facecolor=COLORS["panel"],
-                edgecolor="#e2e6ea",
-                linewidth=0.55,
-                zorder=0,
-            )
-        )
-        _stage_header(ax, x0, x1, label, subtitle)
+    for x0, x1, number, title, subtitle, color, fill in stages:
+        ax.add_patch(Rectangle((x0, 0.34), x1 - x0, 4.24, facecolor=fill, edgecolor="#e1e5e9", linewidth=0.55, zorder=0))
+        stage_header(ax, x0, x1, number, title, subtitle, color)
 
-    for x in [2.125, 8.525, 11.635]:
-        ax.plot([x, x], [0.37, 4.62], color="#c8d0d8", linewidth=0.75, linestyle=(0, (3, 3)), zorder=1)
+    for x in (2.14, 9.50, 12.93):
+        ax.plot([x, x], [0.43, 4.48], color=C["line"], linewidth=0.75, linestyle=(0, (3, 3)), zorder=1)
 
-    # Input split.
-    _rounded_box(
+    split_card(ax)
+
+    # Equal-budget training is shown once as a shared contract above both lanes.
+    ax.plot([2.66, 8.98], [4.43, 4.43], color="#aeb8c2", linewidth=0.75, zorder=3)
+    ax.plot([2.66, 2.66], [4.35, 4.43], color="#aeb8c2", linewidth=0.75, zorder=3)
+    ax.plot([8.98, 8.98], [4.35, 4.43], color="#aeb8c2", linewidth=0.75, zorder=3)
+    ax.text(5.82, 4.43, "identical labels, masks, and optimization budget", ha="center", va="center", fontsize=6.15, color=C["muted"], bbox={"facecolor": C["train_bg"], "edgecolor": "none", "pad": 1.0}, zorder=5)
+
+    expert_lane(
         ax,
-        0.43,
-        1.36,
-        1.38,
-        2.36,
-        title="Fixed split",
-        body=r"$G=(V,E),\,X$",
-        facecolor="#ffffff",
-        edgecolor="#4b5563",
-        title_size=6.8,
-        body_size=6.8,
+        y=2.75,
+        expert="H",
+        name="HARP-GNN",
+        prior="self-loop residual expert",
+        color=C["blue"],
+        soft=C["blue_soft"],
+        ego_separated=False,
     )
-    _graph_icon(ax, 1.12, 2.98, scale=0.90)
-    _mask_strip(ax, 0.67, 1.78, 0.90)
-
-    # Expert lanes.
-    lane_specs = [
-        (2.43, 2.86, 5.72, 1.34, COLORS["blue_fill"], COLORS["blue_edge"], "Expert H: self-loop residual"),
-        (2.43, 1.04, 5.72, 1.34, COLORS["green_fill"], COLORS["green_edge"], "Expert E: ego-separated no-self"),
-    ]
-    for x, y, w, h, face, edge, label in lane_specs:
-        ax.add_patch(
-            FancyBboxPatch(
-                (x, y),
-                w,
-                h,
-                boxstyle="round,pad=0.02,rounding_size=0.055",
-                linewidth=0.95,
-                edgecolor=edge,
-                facecolor=face,
-                zorder=1,
-            )
-        )
-        ax.text(x + 0.16, y + h - 0.14, label, ha="left", va="top", fontsize=7.2, fontweight="bold", color=edge, zorder=4)
-
-    # Self-loop lane internals.
-    _rounded_box(
+    expert_lane(
         ax,
-        2.70,
-        3.14,
-        1.16,
-        0.70,
-        title="self-loop graph",
-        facecolor="#ffffff",
-        edgecolor=COLORS["blue_edge"],
-        title_size=5.7,
+        y=0.98,
+        expert="E",
+        name="HARP-ESep",
+        prior="ego-separated no-self expert",
+        color=C["green"],
+        soft=C["green_soft"],
+        ego_separated=True,
     )
-    _graph_icon(ax, 3.28, 3.38, scale=0.36, edgecolor=COLORS["blue_edge"], self_loops=True)
-    _filter_bank_card(ax, 4.12, 3.13, COLORS["blue_edge"])
-    _gate_card(ax, 5.82, 3.13, COLORS["blue_edge"])
-    _score_card(ax, 7.06, 3.13, "HARP-GNN", r"$a_H$", COLORS["blue_edge"])
 
-    # Ego-separated lane internals.
-    _rounded_box(
-        ax,
-        2.70,
-        1.32,
-        1.16,
-        0.70,
-        title="ego view",
-        facecolor="#ffffff",
-        edgecolor=COLORS["green_edge"],
-        title_size=5.7,
-    )
-    _graph_icon(ax, 3.28, 1.56, scale=0.36, edgecolor=COLORS["green_edge"], no_center_fill=True)
-    _rounded_box(
-        ax,
-        4.12,
-        1.32,
-        1.42,
-        0.70,
-        title="no-self filter",
-        body=r"$B_k=\tilde A^kB_0$",
-        facecolor="#ffffff",
-        edgecolor=COLORS["green_edge"],
-        title_size=6.0,
-        body_size=6.0,
-    )
-    _rounded_box(
-        ax,
-        5.82,
-        1.32,
-        1.22,
-        0.70,
-        title="residual fusion",
-        body=r"$[B_0,U]$",
-        facecolor="#ffffff",
-        edgecolor=COLORS["green_edge"],
-        title_size=5.7,
-        body_size=5.8,
-    )
-    _score_card(ax, 7.06, 1.32, "HARP-ESep", r"$a_E$", COLORS["green_edge"])
+    # The graph split fans out once; colored paths remain traceable to routing.
+    arrow(ax, (1.78, 2.73), (2.43, 3.45), color=C["blue"], lw=1.25, rad=0.17, ms=10.0)
+    arrow(ax, (1.78, 2.30), (2.43, 1.67), color=C["green"], lw=1.25, rad=-0.17, ms=10.0)
 
-    # Router and test evaluation.
-    _router_card(ax)
-    _locked_card(ax)
+    router_card(ax)
+    arrow(ax, (8.99, 3.35), (9.76, 3.25), color=C["blue"], lw=1.2, rad=-0.08, ms=9.5)
+    arrow(ax, (8.99, 1.58), (9.76, 2.56), color=C["green"], lw=1.2, rad=0.14, ms=9.5)
+    ax.text(9.35, 3.49, r"$a_H$", ha="center", va="center", fontsize=7.3, color=C["blue"], zorder=7)
+    ax.text(9.35, 1.94, r"$a_E$", ha="center", va="center", fontsize=7.3, color=C["green"], zorder=7)
 
-    # Arrows.
-    _arrow(ax, (1.83, 2.72), (2.44, 3.55), color=COLORS["blue_edge"], rad=0.18, linewidth=1.05)
-    _arrow(ax, (1.83, 2.30), (2.44, 1.72), color=COLORS["green_edge"], rad=-0.16, linewidth=1.05)
+    test_card(ax)
+    arrow(ax, (12.64, 2.57), (13.20, 2.57), color=C["purple"], lw=1.3, ms=10.0)
+    ax.text(12.93, 2.79, "freeze", ha="center", va="center", fontsize=5.7, color=C["purple"], fontweight="bold", zorder=7)
 
-    for y, color in [(3.48, COLORS["blue_edge"]), (1.66, COLORS["green_edge"])]:
-        _arrow(ax, (3.86, y), (4.12, y), color=color, linewidth=1.0)
-        _arrow(ax, (5.54, y), (5.82, y), color=color, linewidth=1.0)
-        _arrow(ax, (7.04, y), (7.06, y), color=color, linewidth=1.0)
-
-    _arrow(ax, (8.00, 3.48), (8.86, 2.98), color=COLORS["blue_edge"], rad=-0.12, linewidth=1.05)
-    _arrow(ax, (8.00, 1.66), (8.86, 2.10), color=COLORS["green_edge"], rad=0.12, linewidth=1.05)
-    ax.text(8.30, 3.24, r"$a_H$", fontsize=7.2, color=COLORS["blue_edge"], ha="center", va="center")
-    ax.text(8.30, 1.89, r"$a_E$", fontsize=7.2, color=COLORS["green_edge"], ha="center", va="center")
-
-    _arrow(ax, (11.20, 2.54), (11.92, 2.55), color=COLORS["purple_edge"], linewidth=1.05)
-    _arrow(ax, (10.08, 1.42), (10.08, 1.12), color=COLORS["gold_edge"], linewidth=0.85, mutation_scale=7)
-    _arrow(ax, (12.50, 1.58), (12.50, 1.24), color=COLORS["purple_edge"], linewidth=0.85, mutation_scale=7)
-
-    ax.text(
-        5.28,
-        4.44,
-        "identical data split and optimization budget",
-        ha="center",
-        va="center",
-        fontsize=6.6,
-        color=COLORS["muted"],
-    )
-    ax.text(10.02, 4.44, "route first, evaluate second", ha="center", va="center", fontsize=6.6, color=COLORS["muted"])
-
-    fig.savefig(output_path, bbox_inches="tight", pad_inches=0.04)
+    fig.savefig(output_path, bbox_inches="tight", pad_inches=0.035)
     vector_path = output_path.with_suffix(".pdf")
-    fig.savefig(vector_path, bbox_inches="tight", pad_inches=0.04)
+    fig.savefig(vector_path, bbox_inches="tight", pad_inches=0.035)
     plt.close(fig)
     print(f"[saved] {output_path}")
     print(f"[saved] {vector_path}")
