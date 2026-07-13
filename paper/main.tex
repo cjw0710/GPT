@@ -125,7 +125,7 @@ Figure~\ref{fig:select-framework} summarizes the two-expert training and validat
     \fbox{\rule{0pt}{1.5in}\rule{0.95\textwidth}{0pt}}
   }
 }
-\caption{\method{} overview. A fixed split feeds self-loop and ego-separated residual experts trained under the same budget. A frozen validation-confidence rule selects one branch; test labels are used only after the choice is locked.}
+\caption{\method{} overview. Matched-budget residual experts transform two structural views into validation scores. A confidence-calibrated margin freezes one expert before test labels are revealed.}
 \label{fig:select-framework}
 \end{figure*}
 
