@@ -22,9 +22,9 @@ DEFAULT_OUT = ROOT / "paper" / "figures" / "harp_select_framework.png"
 
 plt.rcParams.update(
     {
-        "font.family": "serif",
-        "font.serif": ["Times New Roman", "Times", "DejaVu Serif"],
-        "mathtext.fontset": "stix",
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
+        "mathtext.fontset": "stixsans",
         "axes.unicode_minus": False,
     }
 )
@@ -407,6 +407,14 @@ def draw_split_bar(ax: plt.Axes, cx: float, y: float, *, width: float, labels: b
         ax.text(left + width * 0.90, y - 0.11, "test", ha="center", va="center", fontsize=5.1, color=C["muted"], zorder=8)
 
 
+def draw_test_nodes(ax: plt.Axes, cx: float, cy: float, *, width: float) -> None:
+    fills = ["#dbeafe", "#fee2e2", "#dcfce7", "#ede9fe", "#fef3c7", "#dbeafe"]
+    xs = [cx - width / 2 + width * i / (len(fills) - 1) for i in range(len(fills))]
+    ax.plot([xs[0], xs[-1]], [cy, cy], color=C["line"], lw=0.65, zorder=5)
+    for x, fill in zip(xs, fills):
+        ax.add_patch(Circle((x, cy), 0.066, facecolor=fill, edgecolor=C["purple"], linewidth=0.62, zorder=7))
+
+
 def draw_basis_bank(
     ax: plt.Axes,
     cx: float,
@@ -551,12 +559,10 @@ def draw_input_protocol(ax: plt.Axes) -> None:
         edge_alpha=0.75,
     )
     draw_ego_view(ax, 2.18, 1.88, scale=0.72)
-    ax.text(1.10, 1.27, r"self-loop $\hat A$", ha="center", va="center", fontsize=5.85, color=C["blue"], fontweight="bold", zorder=8)
-    ax.text(2.18, 1.27, r"no-self $\tilde A$", ha="center", va="center", fontsize=5.85, color=C["green"], fontweight="bold", zorder=8)
-    rounded(ax, 0.65, 0.72, 0.93, 0.31, face=C["blue"], edge=C["navy_dark"], lw=0.45, radius=0.05, z=7)
-    rounded(ax, 1.70, 0.72, 0.93, 0.31, face=C["green"], edge="#245d40", lw=0.45, radius=0.05, z=7)
-    ax.text(1.115, 0.875, "H: retain", ha="center", va="center", fontsize=5.45, color=C["white"], fontweight="bold", zorder=8)
-    ax.text(2.165, 0.875, "E: separate", ha="center", va="center", fontsize=5.45, color=C["white"], fontweight="bold", zorder=8)
+    ax.text(1.10, 1.14, "self-loop", ha="center", va="center", fontsize=5.85, color=C["blue"], fontweight="bold", zorder=8)
+    ax.text(1.10, 0.90, r"$\hat A$", ha="center", va="center", fontsize=6.55, color=C["blue"], fontweight="bold", zorder=8)
+    ax.text(2.18, 1.14, "no-self", ha="center", va="center", fontsize=5.85, color=C["green"], fontweight="bold", zorder=8)
+    ax.text(2.18, 0.90, r"$\tilde A$", ha="center", va="center", fontsize=6.55, color=C["green"], fontweight="bold", zorder=8)
 
 
 def draw_expert_lanes(ax: plt.Axes) -> None:
@@ -575,18 +581,17 @@ def draw_expert_lanes(ax: plt.Axes) -> None:
     column_x = [4.72, 6.08, 7.47, 8.94, 10.58]
     column_labels = ["STRUCTURE", "FILTER BANK", "NODE FIELD", "FUSION", "VAL. SCORE"]
     for x, label in zip(column_x, column_labels):
-        ax.text(x, 5.30, label, ha="center", va="center", fontsize=5.0, color=C["muted"], fontweight="bold", zorder=10)
+        ax.text(x, 5.30, label, ha="center", va="center", fontsize=5.25, color=C["muted"], fontweight="bold", zorder=10)
 
     rounded(ax, 3.38, 4.31, 7.90, 0.88, face=C["blue_soft"], edge=C["blue"], lw=0.82, radius=0.06, z=2)
     rounded(ax, 3.38, 3.43, 7.90, 0.80, face=C["green_soft"], edge=C["green"], lw=0.82, radius=0.06, z=2)
 
-    for cy, token, name, color in [
-        (4.75, "H", "HARP-\nGNN", C["blue"]),
-        (3.83, "E", "HARP-\nESep", C["green"]),
+    for cy, name, color, dark in [
+        (4.75, "HARP-GNN", C["blue"], C["navy_dark"]),
+        (3.83, "HARP-ESep", C["green"], "#245d40"),
     ]:
-        ax.add_patch(Circle((3.62, cy), 0.115, facecolor=C["white"], edgecolor=color, linewidth=0.85, zorder=8))
-        ax.text(3.62, cy, token, ha="center", va="center", fontsize=5.8, color=color, fontweight="bold", zorder=9)
-        ax.text(4.08, cy, name, ha="center", va="center", fontsize=5.05, color=color, fontweight="bold", linespacing=0.83, zorder=9)
+        rounded(ax, 3.47, cy - 0.16, 0.98, 0.32, face=color, edge=dark, lw=0.48, radius=0.05, z=7)
+        ax.text(3.96, cy, name, ha="center", va="center", fontsize=5.05, color=C["white"], fontweight="bold", zorder=9)
 
     top_y, bottom_y = 4.70, 3.82
     draw_graph(ax, column_x[0], top_y, scale=0.40, edge_color=C["blue"], node_fills=[C["white"]] * len(GRAPH_POS), outline=C["blue"], loops=True)
@@ -635,7 +640,7 @@ def draw_mechanism_zoom(ax: plt.Axes) -> None:
     ax.text(snapshot_x[2], 2.18, r"$H_k$", ha="center", va="center", fontsize=6.2, color=C["ink"], zorder=8)
     ax.text(4.67, 1.66, r"$-$", ha="center", va="center", fontsize=9.5, color=C["navy"], fontweight="bold", zorder=9)
     ax.text(5.84, 1.66, r"$=$", ha="center", va="center", fontsize=8.5, color=C["navy"], fontweight="bold", zorder=9)
-    ax.text(5.25, 0.80, r"$L_k=\hat A^kX,\qquad H_k=L_{k-1}-L_k$", ha="center", va="center", fontsize=6.0, color=C["ink"], zorder=8)
+    ax.text(5.25, 0.80, r"$L_k=\hat A^kX,\qquad H_k=L_{k-1}-L_k$", ha="center", va="center", fontsize=6.25, color=C["ink"], zorder=8)
 
     ax.text(9.40, 2.52, "E: no-self propagation and fusion", ha="center", va="center", fontsize=5.9, color=C["green"], fontweight="bold", zorder=8)
     draw_matrix(ax, 7.90, 1.65, color=C["green"], scale=1.0)
@@ -646,7 +651,7 @@ def draw_mechanism_zoom(ax: plt.Axes) -> None:
     ax.text(10.65, 2.18, r"$[B_0,U_i]$", ha="center", va="center", fontsize=6.2, color=C["ink"], zorder=8)
     arrow(ax, (8.25, 1.65), (8.67, 1.65), color=C["green"], lw=0.82, ms=6.8)
     arrow(ax, (9.67, 1.65), (10.11, 1.65), color=C["green"], lw=0.82, ms=6.8)
-    ax.text(9.40, 0.80, "explicit ego anchor + filtered neighbors", ha="center", va="center", fontsize=5.45, color=C["muted"], zorder=8)
+    ax.text(9.40, 0.80, "explicit ego anchor + filtered neighbors", ha="center", va="center", fontsize=5.65, color=C["muted"], zorder=8)
 
 
 def draw_validation_evidence(ax: plt.Axes) -> None:
@@ -718,8 +723,8 @@ def draw_locked_test(ax: plt.Axes) -> None:
     draw_signal_graph(ax, 13.63, 1.30, scale=0.50, values=[0.4, -0.6, 0.8, -0.2, 0.6, -0.7, 0.3, 0.9, -0.1], outline=C["purple"])
     draw_lock(ax, 13.63, 1.30, scale=0.82)
 
-    draw_split_bar(ax, 13.63, 0.74, width=1.60, labels=False)
-    ax.text(13.63, 0.57, "test labels never route", ha="center", va="center", fontsize=5.45, color=C["red"], fontweight="bold", zorder=9)
+    draw_test_nodes(ax, 13.63, 0.76, width=1.56)
+    ax.text(13.63, 0.57, "TEST LABELS NEVER ROUTE", ha="center", va="center", fontsize=5.55, color=C["red"], fontweight="bold", zorder=9)
     ax.plot([12.23, 15.03], [0.91, 0.91], color=C["red"], lw=0.72, linestyle=(0, (3, 2)), zorder=5)
     ax.plot([13.52, 13.74], [0.82, 1.00], color=C["red"], lw=1.15, zorder=8)
     ax.plot([13.52, 13.74], [1.00, 0.82], color=C["red"], lw=1.15, zorder=8)
@@ -738,10 +743,10 @@ def plot_framework(output_path: Path) -> None:
     ax.text(
         3.11,
         6.66,
-        "Validation-Calibrated Selection of Complementary Residual Graph Experts",
+        "Validation-Calibrated Routing between Residual Graph Experts",
         ha="left",
         va="center",
-        fontsize=7.45,
+        fontsize=8.15,
         fontweight="bold",
         color=C["ink"],
         zorder=15,
