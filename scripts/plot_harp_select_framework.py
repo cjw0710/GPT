@@ -187,11 +187,10 @@ def split_card(ax: plt.Axes) -> None:
 
     x0, y0, w = 0.68, 1.55, 0.84
     colors = [C["blue"], C["gold"], C["purple"]]
-    labels = ["train", "val", "test"]
-    for i, (color, label) in enumerate(zip(colors, labels)):
+    for i, color in enumerate(colors):
         left = x0 + i * w / 3
         ax.add_patch(Rectangle((left, y0), w / 3 - 0.018, 0.09, facecolor=color, edgecolor="none", zorder=5))
-        ax.text(left + w / 6, y0 - 0.08, label, ha="center", va="top", fontsize=5.15, color=C["muted"], zorder=6)
+    ax.text(1.10, y0 - 0.08, "train   val   test", ha="center", va="top", fontsize=5.0, color=C["muted"], zorder=6)
     ax.text(1.10, 1.22, "shared masks", ha="center", va="center", fontsize=5.7, color=C["muted"], zorder=6)
 
 
@@ -199,7 +198,7 @@ def lane_header(ax: plt.Axes, x: float, y: float, expert: str, name: str, prior:
     ax.add_patch(Circle((x, y), 0.145, facecolor=C["white"], edgecolor=color, linewidth=1.0, zorder=6))
     ax.text(x, y, expert, ha="center", va="center", fontsize=6.8, fontweight="bold", color=color, zorder=7)
     ax.text(x + 0.23, y + 0.02, name, ha="left", va="center", fontsize=7.4, fontweight="bold", color=color, zorder=7)
-    ax.text(x + 1.76, y + 0.02, prior, ha="left", va="center", fontsize=6.0, color=C["muted"], zorder=7)
+    ax.text(x + 1.90, y + 0.02, prior, ha="left", va="center", fontsize=6.0, color=C["muted"], zorder=7)
 
 
 def self_prior_icon(ax: plt.Axes, cx: float, cy: float) -> None:
@@ -252,13 +251,13 @@ def residual_fusion_icon(ax: plt.Axes, cx: float, cy: float) -> None:
     ax.plot([cx + 0.49, cx + 0.56, cx + 0.56, cx + 0.49], [cy + 0.29, cy + 0.29, cy - 0.29, cy - 0.29], color=C["green"], linewidth=1.0, zorder=6)
 
 
-def score_card(ax: plt.Axes, cx: float, cy: float, *, name: str, score: str, color: str) -> None:
-    rounded(ax, cx - 0.51, cy - 0.36, 1.02, 0.72, face=C["white"], edge=color, lw=0.82, radius=0.035, z=3)
-    ax.text(cx, cy + 0.19, name, ha="center", va="center", fontsize=6.4, fontweight="bold", color=color, zorder=6)
+def score_card(ax: plt.Axes, cx: float, cy: float, *, score: str, color: str) -> None:
+    rounded(ax, cx - 0.54, cy - 0.36, 1.08, 0.72, face=C["white"], edge=color, lw=0.82, radius=0.035, z=3)
+    ax.text(cx, cy + 0.18, score, ha="center", va="center", fontsize=8.4, fontweight="bold", color=color, zorder=6)
     ax.plot([cx - 0.27, cx + 0.27], [cy - 0.03, cy - 0.03], color="#d7dde3", linewidth=2.6, solid_capstyle="round", zorder=5)
     ax.plot([cx - 0.27, cx + 0.08], [cy - 0.03, cy - 0.03], color=color, linewidth=2.6, solid_capstyle="round", zorder=6)
     ax.add_patch(Circle((cx + 0.08, cy - 0.03), 0.052, facecolor=C["white"], edgecolor=color, linewidth=0.8, zorder=7))
-    ax.text(cx, cy - 0.23, score + " on validation", ha="center", va="center", fontsize=5.55, color=C["muted"], zorder=6)
+    ax.text(cx, cy - 0.23, "val. score", ha="center", va="center", fontsize=5.9, color=C["muted"], zorder=6)
 
 
 def expert_lane(
@@ -282,14 +281,14 @@ def expert_lane(
         ego_prior_icon(ax, xs[0], cy)
         filter_icon(ax, xs[1], cy, color=color, no_self=True)
         residual_fusion_icon(ax, xs[2], cy)
-        captions = ["ego-separated prior", "no-self residual filters", "explicit ego fusion"]
-        score_card(ax, xs[3], cy, name="HARP-ESep", score=r"$a_E$", color=color)
+        captions = ["no-self prior", "residual bank", "ego fusion"]
+        score_card(ax, xs[3], cy, score=r"$a_E$", color=color)
     else:
         self_prior_icon(ax, xs[0], cy)
         filter_icon(ax, xs[1], cy, color=color, no_self=False)
         gate_icon(ax, xs[2], cy)
-        captions = ["self-loop prior", "low + residual filters", "node-wise gate"]
-        score_card(ax, xs[3], cy, name="HARP-GNN", score=r"$a_H$", color=color)
+        captions = ["self-loop prior", "residual bank", "node gate"]
+        score_card(ax, xs[3], cy, score=r"$a_H$", color=color)
 
     for cx, label in zip(xs[:3], captions):
         ax.text(cx, y + 0.12, label, ha="center", va="center", fontsize=5.55, color=C["ink"], zorder=7)
@@ -300,7 +299,7 @@ def expert_lane(
 def router_card(ax: plt.Axes) -> None:
     x, y, w, h = 9.74, 1.03, 2.92, 3.24
     rounded(ax, x, y, w, h, face=C["gold_soft"], edge=C["gold"], lw=1.0, radius=0.06, z=2)
-    ax.text(x + w / 2, y + h - 0.23, "Validation-only selector", ha="center", va="center", fontsize=7.5, fontweight="bold", color=C["ink"], zorder=6)
+    ax.text(x + w / 2, y + h - 0.23, "Validation comparator", ha="center", va="center", fontsize=7.5, fontweight="bold", color=C["ink"], zorder=6)
 
     # Two aligned score bars make the compared evidence explicit.
     bar_x0, bar_x1 = x + 0.84, x + 2.36
@@ -346,7 +345,7 @@ def lock_icon(ax: plt.Axes, cx: float, cy: float) -> None:
 def test_card(ax: plt.Axes) -> None:
     x, y, w, h = 13.18, 1.18, 1.53, 2.74
     rounded(ax, x, y, w, h, face=C["purple_soft"], edge=C["purple"], lw=1.0, radius=0.055, z=2)
-    ax.text(x + w / 2, y + h - 0.25, "Frozen expert", ha="center", va="center", fontsize=7.2, fontweight="bold", color=C["ink"], zorder=6)
+    ax.text(x + w / 2, y + h - 0.25, "One branch", ha="center", va="center", fontsize=7.2, fontweight="bold", color=C["ink"], zorder=6)
 
     token_y = y + 1.97
     for xx, label, color, soft in [
@@ -367,22 +366,24 @@ def test_card(ax: plt.Axes) -> None:
     cross_x = 13.62
     ax.plot([cross_x - 0.09, cross_x + 0.09], [back_y - 0.12, back_y + 0.12], color=C["red"], linewidth=1.5, zorder=8)
     ax.plot([cross_x - 0.09, cross_x + 0.09], [back_y + 0.12, back_y - 0.12], color=C["red"], linewidth=1.5, zorder=8)
-    ax.text(13.95, 0.47, "test labels never route", ha="center", va="center", fontsize=5.9, color=C["red"], fontweight="bold", zorder=6)
+    ax.text(13.95, 0.47, "no test-label routing", ha="center", va="center", fontsize=5.9, color=C["red"], fontweight="bold", zorder=6)
 
 
 def plot_framework(output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(8.55, 3.02), dpi=420)
+    # Match the 7-inch AAAI text block closely so labels are not needlessly
+    # downscaled when the vector figure is included at \textwidth.
+    fig, ax = plt.subplots(figsize=(7.35, 2.60), dpi=450)
     ax.set_xlim(0, 15.10)
     ax.set_ylim(0.24, 5.25)
     ax.axis("off")
 
     stages = [
-        (0.14, 2.06, 1, "data split", r"one graph, fixed masks", C["muted"], C["data_bg"]),
-        (2.22, 9.42, 2, "parallel experts", "two structural priors, same budget", C["blue"], C["train_bg"]),
-        (9.58, 12.84, 3, "confidence routing", "validation evidence only", C["gold"], C["route_bg"]),
-        (13.02, 14.92, 4, "locked test", "one final evaluation", C["purple"], C["test_bg"]),
+        (0.14, 2.06, 1, "input", r"fixed graph split", C["muted"], C["data_bg"]),
+        (2.22, 9.42, 2, "dual experts", "same split + budget", C["blue"], C["train_bg"]),
+        (9.58, 12.84, 3, "validation router", "confidence rule only", C["gold"], C["route_bg"]),
+        (13.02, 14.92, 4, "locked test", "evaluate once", C["purple"], C["test_bg"]),
     ]
     for x0, x1, number, title, subtitle, color, fill in stages:
         ax.add_patch(Rectangle((x0, 0.34), x1 - x0, 4.24, facecolor=fill, edgecolor="#e1e5e9", linewidth=0.55, zorder=0))
@@ -397,14 +398,14 @@ def plot_framework(output_path: Path) -> None:
     ax.plot([2.66, 8.98], [4.43, 4.43], color="#aeb8c2", linewidth=0.75, zorder=3)
     ax.plot([2.66, 2.66], [4.35, 4.43], color="#aeb8c2", linewidth=0.75, zorder=3)
     ax.plot([8.98, 8.98], [4.35, 4.43], color="#aeb8c2", linewidth=0.75, zorder=3)
-    ax.text(5.82, 4.43, "identical labels, masks, and optimization budget", ha="center", va="center", fontsize=6.15, color=C["muted"], bbox={"facecolor": C["train_bg"], "edgecolor": "none", "pad": 1.0}, zorder=5)
+    ax.text(5.82, 4.43, "identical split, labels, and training budget", ha="center", va="center", fontsize=6.15, color=C["muted"], bbox={"facecolor": C["train_bg"], "edgecolor": "none", "pad": 1.0}, zorder=5)
 
     expert_lane(
         ax,
         y=2.75,
         expert="H",
         name="HARP-GNN",
-        prior="self-loop residual expert",
+        prior="self-loop structure",
         color=C["blue"],
         soft=C["blue_soft"],
         ego_separated=False,
@@ -414,7 +415,7 @@ def plot_framework(output_path: Path) -> None:
         y=0.98,
         expert="E",
         name="HARP-ESep",
-        prior="ego-separated no-self expert",
+        prior="ego-separated structure",
         color=C["green"],
         soft=C["green_soft"],
         ego_separated=True,
@@ -427,12 +428,9 @@ def plot_framework(output_path: Path) -> None:
     router_card(ax)
     arrow(ax, (8.99, 3.35), (9.76, 3.25), color=C["blue"], lw=1.2, rad=-0.08, ms=9.5)
     arrow(ax, (8.99, 1.58), (9.76, 2.56), color=C["green"], lw=1.2, rad=0.14, ms=9.5)
-    ax.text(9.35, 3.49, r"$a_H$", ha="center", va="center", fontsize=7.3, color=C["blue"], zorder=7)
-    ax.text(9.35, 1.94, r"$a_E$", ha="center", va="center", fontsize=7.3, color=C["green"], zorder=7)
 
     test_card(ax)
     arrow(ax, (12.64, 2.57), (13.20, 2.57), color=C["purple"], lw=1.3, ms=10.0)
-    ax.text(12.93, 2.79, "freeze", ha="center", va="center", fontsize=5.7, color=C["purple"], fontweight="bold", zorder=7)
 
     fig.savefig(output_path, bbox_inches="tight", pad_inches=0.035)
     vector_path = output_path.with_suffix(".pdf")
