@@ -855,6 +855,163 @@ def draw_locked_test(ax: plt.Axes) -> None:
     ax.text(12.10, 1.88, "no label route", ha="left", va="center", fontsize=4.45, color=C["red"], zorder=8)
 
 
+def draw_stage_badge(ax: plt.Axes, x: float, y: float, label: str, color: str) -> None:
+    ax.add_patch(Circle((x, y), 0.115, facecolor=color, edgecolor=C["white"], linewidth=0.75, zorder=14))
+    ax.text(x, y, label, ha="center", va="center", fontsize=5.15, color=C["white"], fontweight="bold", zorder=15)
+
+
+def draw_clean_protocol(ax: plt.Axes) -> None:
+    panel(
+        ax,
+        0.42,
+        0.50,
+        2.45,
+        5.45,
+        title="Shared graph split",
+        subtitle="fixed once for both experts",
+        face=C["white"],
+        title_size=7.15,
+    )
+    draw_perspective_grid(ax, 1.64, 4.45, width=1.72, height=1.16)
+    draw_graph(ax, 1.64, 4.45, scale=0.88, edge_color="#748490")
+    draw_split_bar(ax, 1.64, 3.72, width=1.70)
+
+    ax.text(1.64, 3.22, "MATCHED PROTOCOL", ha="center", va="center", fontsize=5.45, color=C["navy_dark"], fontweight="bold", zorder=8)
+    protocol_rows = [
+        (2.70, "fixed train/val/test masks"),
+        (2.17, "identical optimizer"),
+        (1.64, "identical training budget"),
+    ]
+    for y, label in protocol_rows:
+        ax.add_patch(Circle((0.82, y), 0.075, facecolor=C["outer"], edgecolor=C["navy"], linewidth=0.65, zorder=6))
+        ax.text(0.82, y, "=", ha="center", va="center", fontsize=4.7, color=C["navy"], fontweight="bold", zorder=8)
+        ax.text(1.02, y, label, ha="left", va="center", fontsize=5.05, color=C["ink"], zorder=8)
+
+    rounded(ax, 0.72, 0.78, 1.84, 0.40, face=C["outer"], edge=C["line"], lw=0.60, radius=0.05, z=4)
+    ax.text(1.64, 0.98, r"shared $(G,X)$ and labels", ha="center", va="center", fontsize=4.95, color=C["muted"], zorder=8)
+
+
+def draw_clean_experts(ax: plt.Axes) -> None:
+    panel(
+        ax,
+        3.12,
+        0.50,
+        8.05,
+        5.45,
+        title="Matched-budget residual experts",
+        subtitle="parallel training; no cross-branch information",
+        face=C["warm"],
+        title_size=7.45,
+    )
+    columns = [5.04, 6.55, 8.22, 10.16]
+    labels = ["VIEW", "FILTER BANK", "FUSION", "VAL. SCORE"]
+    for x, label in zip(columns, labels):
+        ax.text(x, 5.13, label, ha="center", va="center", fontsize=5.35, color=C["muted"], fontweight="bold", zorder=10)
+
+    lane_specs = [
+        (3.84, 4.32, C["blue_soft"], C["blue"], C["navy_dark"], "HARP-GNN"),
+        (2.72, 3.20, C["green_soft"], C["green"], "#245d40", "HARP-ESep"),
+    ]
+    for y0, cy, soft, color, dark, name in lane_specs:
+        rounded(ax, 3.36, y0, 7.53, 0.94, face=soft, edge=color, lw=0.82, radius=0.065, z=2)
+        rounded(ax, 3.48, cy - 0.17, 1.05, 0.34, face=color, edge=dark, lw=0.50, radius=0.05, z=7)
+        ax.text(4.005, cy, name, ha="center", va="center", fontsize=5.05, color=C["white"], fontweight="bold", zorder=9)
+
+    top_y, bottom_y = 4.32, 3.20
+    draw_graph_stack(ax, columns[0], top_y, scale=0.34, color=C["blue"], loops=True)
+    draw_ego_view(ax, columns[0], bottom_y, scale=0.50)
+    ax.text(columns[0], top_y - 0.34, r"self-loop $\hat A$", ha="center", va="center", fontsize=4.65, color=C["blue"], zorder=9)
+    ax.text(columns[0], bottom_y - 0.34, r"no-self $\tilde A$", ha="center", va="center", fontsize=4.65, color=C["green"], zorder=9)
+
+    draw_basis_bank(ax, columns[1], top_y, color=C["blue"], scale=0.88, no_self=False)
+    draw_basis_bank(ax, columns[1], bottom_y, color=C["green"], scale=0.88, no_self=True)
+    draw_node_gate(ax, columns[2], top_y, scale=0.98)
+    draw_feature_fusion(ax, columns[2], bottom_y, scale=0.98)
+    draw_score_interval(ax, columns[3], top_y, color=C["blue"], label=r"$a_H$", scale=0.98)
+    draw_score_interval(ax, columns[3], bottom_y, color=C["green"], label=r"$a_E$", scale=0.98)
+
+    for y, color in [(top_y, C["blue"]), (bottom_y, C["green"])]:
+        for start, end in [(5.42, 5.99), (7.04, 7.63), (8.74, 9.52)]:
+            arrow(ax, (start, y), (end, y), color=color, lw=0.82, ms=6.7)
+
+    rounded(ax, 3.46, 0.77, 7.33, 1.49, face="#fbfcfd", edge=C["line_light"], lw=0.68, radius=0.065, z=2)
+    ax.text(7.13, 2.08, "COMPLEMENTARY RESIDUAL BASES", ha="center", va="center", fontsize=5.35, color=C["muted"], fontweight="bold", zorder=9)
+    ax.plot([7.13, 7.13], [0.91, 1.93], color=C["line_light"], lw=0.65, zorder=4)
+
+    draw_signal_graph(ax, 4.18, 1.40, scale=0.39, values=[-0.2, 0.5, 0.2, -0.6, 0.3, -0.4, 0.6, -0.1, 0.4], outline=C["blue"])
+    ax.text(5.62, 1.62, "H: residual node fields", ha="center", va="center", fontsize=5.35, color=C["blue"], fontweight="bold", zorder=8)
+    ax.text(5.62, 1.18, r"$H_k=\hat A^{k-1}X-\hat A^kX$", ha="center", va="center", fontsize=5.85, color=C["ink"], zorder=8)
+
+    draw_ego_view(ax, 7.78, 1.39, scale=0.50)
+    ax.text(9.27, 1.62, "E: ego-separated fusion", ha="center", va="center", fontsize=5.35, color=C["green"], fontweight="bold", zorder=8)
+    ax.text(9.27, 1.18, r"$B_k=\tilde A^kB_0,\quad [B_0,U_i]$", ha="center", va="center", fontsize=5.85, color=C["ink"], zorder=8)
+
+
+def draw_clean_selector(ax: plt.Axes) -> None:
+    panel(
+        ax,
+        11.43,
+        0.50,
+        4.12,
+        5.45,
+        title="Validation route and test",
+        subtitle="select first, evaluate second",
+        face=C["gold_soft"],
+        edge=C["gold"],
+        title_size=7.20,
+    )
+    interval_specs = [
+        (4.82, 12.56, 13.72, 13.29, C["blue"], r"$a_H$"),
+        (4.46, 12.77, 14.24, 13.88, C["green"], r"$a_E$"),
+    ]
+    for y, lo, hi, point, color, label in interval_specs:
+        ax.text(11.85, y, label, ha="center", va="center", fontsize=6.45, color=color, fontweight="bold", zorder=9)
+        ax.plot([12.15, 15.08], [y, y], color="#e2d9ba", lw=1.0, zorder=4)
+        ax.plot([lo, hi], [y, y], color=color, lw=2.0, solid_capstyle="round", zorder=6)
+        ax.plot([lo, lo], [y - 0.07, y + 0.07], color=color, lw=0.78, zorder=6)
+        ax.plot([hi, hi], [y - 0.07, y + 0.07], color=color, lw=0.78, zorder=6)
+        ax.add_patch(Circle((point, y), 0.052, facecolor=C["white"], edgecolor=color, linewidth=0.8, zorder=8))
+
+    ax.text(13.49, 4.03, r"$\Delta_{\rm val}=a_E-a_H$", ha="center", va="center", fontsize=6.1, color=C["ink"], zorder=8)
+    gauge_left, gauge_right, gauge_y = 12.05, 14.95, 3.67
+    tau_x, point_x = 13.17, 14.03
+    ax.plot([gauge_left, gauge_right], [gauge_y, gauge_y], color=C["line"], lw=1.15, zorder=4)
+    ax.plot([tau_x, gauge_right], [gauge_y, gauge_y], color=C["gold"], lw=2.0, zorder=5)
+    ax.plot([tau_x, tau_x], [gauge_y - 0.15, gauge_y + 0.15], color=C["red"], lw=0.85, linestyle=(0, (2, 2)), zorder=7)
+    ax.add_patch(Circle((point_x, gauge_y), 0.072, facecolor=C["green"], edgecolor=C["white"], linewidth=0.75, zorder=8))
+    ax.text(12.55, 3.44, "retain H", ha="center", va="center", fontsize=4.8, color=C["blue"], zorder=8)
+    ax.text(14.18, 3.44, "select E", ha="center", va="center", fontsize=4.8, color=C["green"], zorder=8)
+    ax.text(13.49, 3.18, r"switch only if $\Delta_{\rm val}>1.96\,\mathrm{SE}$", ha="center", va="center", fontsize=5.25, color=C["ink"], zorder=8)
+
+    for x, token, color, soft in [(12.16, "H", C["blue"], C["blue_soft"]), (14.82, "E", C["green"], C["green_soft"])]:
+        ax.add_patch(Circle((x, 2.78), 0.145, facecolor=soft, edgecolor=color, linewidth=0.85, zorder=7))
+        ax.text(x, 2.78, token, ha="center", va="center", fontsize=6.0, color=color, fontweight="bold", zorder=8)
+        arrow(ax, (x + (0.13 if x < 13.49 else -0.13), 2.76), (13.30 if x < 13.49 else 13.68, 2.67), color=C["purple"], lw=0.68, ms=5.8)
+    ax.add_patch(Polygon([(13.49, 2.84), (13.29, 2.65), (13.49, 2.46), (13.69, 2.65)], closed=True, facecolor=C["white"], edgecolor=C["purple"], linewidth=0.82, zorder=7))
+    ax.text(13.49, 2.65, r"$e^*$", ha="center", va="center", fontsize=5.8, color=C["purple"], fontweight="bold", zorder=8)
+    draw_lock(ax, 13.49, 2.28, scale=0.58)
+
+    ax.plot([11.72, 15.27], [2.06, 2.06], color=C["red"], lw=0.72, linestyle=(0, (3, 2)), zorder=5)
+    ax.text(13.49, 1.93, "test labels revealed after branch lock", ha="center", va="center", fontsize=4.75, color=C["red"], zorder=8)
+
+    draw_graph(ax, 12.12, 1.38, scale=0.39, edge_color="#7f8b96", edge_alpha=0.72, lw=0.58)
+    ax.text(12.12, 1.06, r"$G_{\rm test}$", ha="center", va="center", fontsize=4.9, color=C["muted"], zorder=8)
+    arrow(ax, (12.48, 1.38), (12.82, 1.38), color=C["purple"], lw=0.72, ms=6.0)
+    rounded(ax, 12.86, 1.10, 1.13, 0.57, face=C["white"], edge=C["purple"], lw=0.76, radius=0.055, z=5)
+    draw_lock(ax, 13.16, 1.39, scale=0.56)
+    ax.text(13.66, 1.38, r"$f_{e^*}$", ha="center", va="center", fontsize=5.65, color=C["purple"], fontweight="bold", zorder=8)
+    arrow(ax, (14.00, 1.38), (14.31, 1.38), color=C["purple"], lw=0.72, ms=6.0)
+    rounded(ax, 14.34, 1.13, 0.62, 0.50, face=C["white"], edge=C["purple"], lw=0.72, radius=0.05, z=5)
+    ax.text(14.65, 1.38, r"$\hat y$", ha="center", va="center", fontsize=6.7, color=C["purple"], fontweight="bold", zorder=8)
+
+    draw_test_nodes(ax, 12.28, 0.76, width=0.82)
+    ax.text(12.28, 0.58, r"$y_{\rm test}$", ha="center", va="center", fontsize=4.7, color=C["muted"], zorder=8)
+    arrow(ax, (12.71, 0.76), (14.05, 0.76), color=C["purple"], lw=0.64, ms=5.5)
+    rounded(ax, 14.08, 0.56, 1.00, 0.42, face=C["white"], edge=C["purple"], lw=0.68, radius=0.05, z=5)
+    ax.text(14.58, 0.77, r"score$(\hat y,y)$", ha="center", va="center", fontsize=4.65, color=C["ink"], fontweight="bold", zorder=8)
+    elbow_arrow(ax, [(14.65, 1.12), (14.65, 1.02), (14.60, 1.00)], color=C["purple"], lw=0.62, ms=5.0)
+
+
 def plot_framework(output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -868,7 +1025,7 @@ def plot_framework(output_path: Path) -> None:
     ax.text(
         3.11,
         6.66,
-        "Validation-Calibrated Routing between Residual Graph Experts",
+        "Validation-Calibrated Routing for Complementary Residual Graph Experts",
         ha="left",
         va="center",
         fontsize=8.15,
@@ -877,21 +1034,17 @@ def plot_framework(output_path: Path) -> None:
         zorder=15,
     )
 
-    draw_input_protocol(ax)
-    draw_expert_lanes(ax)
-    draw_mechanism_zoom(ax)
-    draw_validation_evidence(ax)
-    draw_locked_test(ax)
+    draw_clean_protocol(ax)
+    draw_clean_experts(ax)
+    draw_clean_selector(ax)
 
-    arrow(ax, (2.87, 5.25), (3.19, 5.25), color=C["navy_dark"], lw=1.0, ms=8.5)
-    elbow_arrow(ax, [(2.79, 2.20), (2.98, 2.20), (2.98, 4.70), (3.40, 4.70)], color=C["blue"], lw=0.82, ms=7.2)
-    elbow_arrow(ax, [(2.79, 1.62), (3.08, 1.62), (3.08, 3.82), (3.40, 3.82)], color=C["green"], lw=0.82, ms=7.2)
+    arrow(ax, (2.87, 4.35), (3.15, 4.35), color=C["navy_dark"], lw=0.90, ms=7.5)
+    ax.plot([3.16, 3.16], [3.20, 4.32], color=C["navy_dark"], lw=0.72, zorder=10)
+    arrow(ax, (3.16, 4.32), (3.38, 4.32), color=C["blue"], lw=0.78, ms=6.4)
+    arrow(ax, (3.16, 3.20), (3.38, 3.20), color=C["green"], lw=0.78, ms=6.4)
 
-    arrow(ax, (11.28, 4.70), (11.75, 4.95), color=C["blue"], lw=0.95, rad=-0.08, ms=8.0)
-    arrow(ax, (11.28, 3.82), (11.75, 4.65), color=C["green"], lw=0.95, rad=-0.12, ms=8.0)
-    arrow(ax, (13.64, 3.33), (13.64, 3.06), color=C["purple"], lw=1.0, ms=8.0)
-    arrow(ax, (6.08, 4.31), (5.25, 3.06), color=C["blue"], lw=0.70, rad=0.12, ms=6.3, style=(0, (3, 2)))
-    arrow(ax, (8.94, 3.43), (9.40, 3.06), color=C["green"], lw=0.70, rad=-0.10, ms=6.3, style=(0, (3, 2)))
+    arrow(ax, (10.89, 4.32), (11.45, 4.78), color=C["blue"], lw=0.88, rad=-0.08, ms=7.3)
+    arrow(ax, (10.89, 3.20), (11.45, 4.43), color=C["green"], lw=0.88, rad=-0.10, ms=7.3)
 
     fig.savefig(output_path, bbox_inches="tight", pad_inches=0.035)
     vector_path = output_path.with_suffix(".pdf")
