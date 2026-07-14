@@ -219,6 +219,32 @@ def arrow(
     )
 
 
+def elbow_arrow(
+    ax: plt.Axes,
+    points: list[tuple[float, float]],
+    *,
+    color: str,
+    lw: float = 0.88,
+    ms: float = 7.5,
+    style: object = "-",
+    z: int = 11,
+) -> None:
+    if len(points) < 2:
+        return
+    if len(points) > 2:
+        ax.plot(
+            [point[0] for point in points[:-1]],
+            [point[1] for point in points[:-1]],
+            color=color,
+            linewidth=lw,
+            linestyle=style,
+            solid_capstyle="round",
+            solid_joinstyle="round",
+            zorder=z,
+        )
+    arrow(ax, points[-2], points[-1], color=color, lw=lw, ms=ms, style=style, z=z)
+
+
 def blend(color: str, amount: float) -> str:
     base = to_rgb(color)
     amount = max(0.0, min(1.0, amount))
@@ -233,6 +259,40 @@ def signal_color(value: float) -> str:
 
 def graph_points(cx: float, cy: float, scale: float) -> list[tuple[float, float]]:
     return [(cx + x * scale, cy + y * scale) for x, y in GRAPH_POS]
+
+
+def draw_perspective_grid(
+    ax: plt.Axes,
+    cx: float,
+    cy: float,
+    *,
+    width: float,
+    height: float,
+    color: str = C["line_light"],
+) -> None:
+    skew = 0.18 * height
+    for i in range(6):
+        t = i / 5
+        x = cx - width / 2 + width * t
+        ax.plot(
+            [x - skew, x + skew],
+            [cy - height / 2, cy + height / 2],
+            color=color,
+            linewidth=0.44,
+            alpha=0.55,
+            zorder=2,
+        )
+    for i in range(5):
+        t = i / 4
+        y = cy - height / 2 + height * t
+        ax.plot(
+            [cx - width / 2 - skew * (0.5 - t), cx + width / 2 - skew * (0.5 - t)],
+            [y, y],
+            color=color,
+            linewidth=0.44,
+            alpha=0.55,
+            zorder=2,
+        )
 
 
 def draw_graph(
@@ -299,6 +359,43 @@ def draw_graph(
                     zorder=5,
                 )
             )
+
+
+def draw_graph_stack(
+    ax: plt.Axes,
+    cx: float,
+    cy: float,
+    *,
+    scale: float,
+    color: str,
+    loops: bool,
+) -> None:
+    offsets = [(0.17, 0.13), (0.085, 0.065), (0.0, 0.0)]
+    front = graph_points(cx, cy, scale)
+    back = graph_points(cx + offsets[0][0], cy + offsets[0][1], scale)
+    for idx in (0, 2, 4, 6):
+        ax.plot(
+            [front[idx][0], back[idx][0]],
+            [front[idx][1], back[idx][1]],
+            color=blend(color, 0.52),
+            linewidth=0.48,
+            alpha=0.70,
+            zorder=3,
+        )
+    for layer, (dx, dy) in enumerate(offsets):
+        strength = 0.18 + 0.18 * layer
+        draw_graph(
+            ax,
+            cx + dx,
+            cy + dy,
+            scale=scale,
+            edge_color=blend(color, 0.55 + 0.18 * layer),
+            node_fills=[blend(color, strength)] * len(GRAPH_POS),
+            outline=color,
+            loops=loops and layer == len(offsets) - 1,
+            edge_alpha=0.36 + 0.22 * layer,
+            lw=0.48 + 0.08 * layer,
+        )
 
 
 def draw_signal_graph(
@@ -385,26 +482,38 @@ def draw_ego_view(ax: plt.Axes, cx: float, cy: float, *, scale: float) -> None:
 
 def draw_split_bar(ax: plt.Axes, cx: float, y: float, *, width: float, labels: bool = True) -> None:
     left = cx - width / 2
-    segments = [(0.58, C["blue"]), (0.22, C["gold"]), (0.20, C["purple"])]
+    segments = [
+        (0.58, C["blue"], "train"),
+        (0.22, C["gold"], "val"),
+        (0.20, C["purple"], "test"),
+    ]
     cursor = left
-    for fraction, color in segments:
+    for fraction, color, label in segments:
         segment_width = width * fraction
         ax.add_patch(
             Rectangle(
                 (cursor, y),
                 segment_width,
-                0.13,
+                0.17,
                 facecolor=color,
                 edgecolor=C["white"],
                 linewidth=0.35,
                 zorder=7,
             )
         )
+        if labels:
+            ax.text(
+                cursor + segment_width / 2,
+                y + 0.085,
+                label,
+                ha="center",
+                va="center",
+                fontsize=4.55,
+                color=C["white"],
+                fontweight="bold",
+                zorder=8,
+            )
         cursor += segment_width
-    if labels:
-        ax.text(left + width * 0.29, y - 0.11, "train", ha="center", va="center", fontsize=5.1, color=C["muted"], zorder=8)
-        ax.text(left + width * 0.69, y - 0.11, "val", ha="center", va="center", fontsize=5.1, color=C["muted"], zorder=8)
-        ax.text(left + width * 0.90, y - 0.11, "test", ha="center", va="center", fontsize=5.1, color=C["muted"], zorder=8)
 
 
 def draw_test_nodes(ax: plt.Axes, cx: float, cy: float, *, width: float) -> None:
@@ -528,8 +637,9 @@ def draw_input_protocol(ax: plt.Axes) -> None:
         face=C["white"],
         title_size=7.15,
     )
+    draw_perspective_grid(ax, 1.64, 4.78, width=1.70, height=1.10)
     draw_graph(ax, 1.64, 4.78, scale=0.88, edge_color="#748490")
-    draw_split_bar(ax, 1.64, 4.09, width=1.58)
+    draw_split_bar(ax, 1.64, 4.04, width=1.66)
 
     panel(
         ax,
@@ -578,7 +688,7 @@ def draw_expert_lanes(ax: plt.Axes) -> None:
         title_size=7.55,
     )
 
-    column_x = [4.72, 6.08, 7.47, 8.94, 10.58]
+    column_x = [4.82, 6.12, 7.49, 8.95, 10.58]
     column_labels = ["STRUCTURE", "FILTER BANK", "NODE FIELD", "FUSION", "VAL. SCORE"]
     for x, label in zip(column_x, column_labels):
         ax.text(x, 5.30, label, ha="center", va="center", fontsize=5.25, color=C["muted"], fontweight="bold", zorder=10)
@@ -590,17 +700,17 @@ def draw_expert_lanes(ax: plt.Axes) -> None:
         (4.75, "HARP-GNN", C["blue"], C["navy_dark"]),
         (3.83, "HARP-ESep", C["green"], "#245d40"),
     ]:
-        rounded(ax, 3.47, cy - 0.16, 0.98, 0.32, face=color, edge=dark, lw=0.48, radius=0.05, z=7)
-        ax.text(3.96, cy, name, ha="center", va="center", fontsize=5.05, color=C["white"], fontweight="bold", zorder=9)
+        rounded(ax, 3.47, cy - 0.16, 0.90, 0.32, face=color, edge=dark, lw=0.48, radius=0.05, z=7)
+        ax.text(3.92, cy, name, ha="center", va="center", fontsize=4.86, color=C["white"], fontweight="bold", zorder=9)
 
     top_y, bottom_y = 4.70, 3.82
-    draw_graph(ax, column_x[0], top_y, scale=0.40, edge_color=C["blue"], node_fills=[C["white"]] * len(GRAPH_POS), outline=C["blue"], loops=True)
+    draw_graph_stack(ax, column_x[0], top_y, scale=0.34, color=C["blue"], loops=True)
     draw_basis_bank(ax, column_x[1], top_y, color=C["blue"], scale=0.82, no_self=False)
     draw_signal_graph(ax, column_x[2], top_y, scale=0.39, values=[-0.8, 0.2, 0.8, -0.4, 0.6, -0.7, 0.3, 0.9, -0.1], outline=C["blue"])
     draw_node_gate(ax, column_x[3], top_y, scale=0.92)
     draw_score_interval(ax, column_x[4], top_y, color=C["blue"], label=r"$a_H$", scale=0.90)
 
-    draw_ego_view(ax, column_x[0], bottom_y, scale=0.55)
+    draw_ego_view(ax, column_x[0], bottom_y, scale=0.49)
     draw_basis_bank(ax, column_x[1], bottom_y, color=C["green"], scale=0.82, no_self=True)
     draw_signal_graph(ax, column_x[2], bottom_y, scale=0.37, values=[0.7, -0.6, 0.1, 0.8, -0.3, 0.5, -0.9, 0.4, 0.2], outline=C["green"])
     draw_feature_fusion(ax, column_x[3], bottom_y, scale=0.90)
@@ -709,25 +819,40 @@ def draw_locked_test(ax: plt.Axes) -> None:
         title_size=7.25,
     )
     for x, token, color, soft in [
-        (12.45, "H", C["blue"], C["blue_soft"]),
-        (14.82, "E", C["green"], C["green_soft"]),
+        (12.42, "H", C["blue"], C["blue_soft"]),
+        (14.84, "E", C["green"], C["green_soft"]),
     ]:
-        ax.add_patch(Circle((x, 2.25), 0.17, facecolor=soft, edgecolor=color, linewidth=0.9, zorder=7))
-        ax.text(x, 2.25, token, ha="center", va="center", fontsize=6.7, color=color, fontweight="bold", zorder=8)
-        arrow(ax, (x, 2.10), (13.63, 1.91), color=C["purple"], lw=0.75, ms=6.5)
+        ax.add_patch(Circle((x, 2.25), 0.16, facecolor=soft, edgecolor=color, linewidth=0.9, zorder=7))
+        ax.text(x, 2.25, token, ha="center", va="center", fontsize=6.5, color=color, fontweight="bold", zorder=8)
+        arrow(ax, (x, 2.20), (13.43 if x < 13.63 else 13.83, 2.05), color=C["purple"], lw=0.72, ms=6.2)
 
-    ax.add_patch(Polygon([(13.63, 2.05), (13.40, 1.82), (13.86, 1.82)], closed=True, facecolor=C["white"], edgecolor=C["purple"], linewidth=0.85, zorder=7))
-    ax.text(13.63, 1.90, r"$e^*$", ha="center", va="center", fontsize=6.2, color=C["purple"], fontweight="bold", zorder=8)
-    arrow(ax, (13.63, 1.80), (13.63, 1.58), color=C["purple"], lw=0.8, ms=6.5)
+    ax.add_patch(Polygon([(13.63, 2.18), (13.38, 2.00), (13.63, 1.82), (13.88, 2.00)], closed=True, facecolor=C["white"], edgecolor=C["purple"], linewidth=0.85, zorder=7))
+    ax.text(13.63, 2.00, r"$e^*$", ha="center", va="center", fontsize=6.0, color=C["purple"], fontweight="bold", zorder=8)
+    arrow(ax, (13.63, 1.82), (13.63, 1.76), color=C["purple"], lw=0.8, ms=6.2)
 
-    draw_signal_graph(ax, 13.63, 1.30, scale=0.50, values=[0.4, -0.6, 0.8, -0.2, 0.6, -0.7, 0.3, 0.9, -0.1], outline=C["purple"])
-    draw_lock(ax, 13.63, 1.30, scale=0.82)
+    draw_graph(ax, 12.48, 1.43, scale=0.39, edge_color="#7f8b96", edge_alpha=0.72, lw=0.58)
+    ax.text(12.48, 1.11, r"$G_{\rm test}$", ha="center", va="center", fontsize=5.15, color=C["muted"], zorder=8)
+    arrow(ax, (12.82, 1.43), (13.08, 1.43), color=C["purple"], lw=0.78, ms=6.5)
 
-    draw_test_nodes(ax, 13.63, 0.76, width=1.56)
-    ax.text(13.63, 0.57, "TEST LABELS NEVER ROUTE", ha="center", va="center", fontsize=5.55, color=C["red"], fontweight="bold", zorder=9)
-    ax.plot([12.23, 15.03], [0.91, 0.91], color=C["red"], lw=0.72, linestyle=(0, (3, 2)), zorder=5)
-    ax.plot([13.52, 13.74], [0.82, 1.00], color=C["red"], lw=1.15, zorder=8)
-    ax.plot([13.52, 13.74], [1.00, 0.82], color=C["red"], lw=1.15, zorder=8)
+    rounded(ax, 13.10, 1.14, 1.04, 0.58, face=C["white"], edge=C["purple"], lw=0.80, radius=0.06, z=5)
+    draw_lock(ax, 13.39, 1.45, scale=0.63)
+    ax.text(13.82, 1.43, r"$f_{e^*}$", ha="center", va="center", fontsize=6.0, color=C["purple"], fontweight="bold", zorder=8)
+
+    arrow(ax, (14.15, 1.43), (14.49, 1.43), color=C["purple"], lw=0.78, ms=6.5)
+    rounded(ax, 14.52, 1.20, 0.62, 0.46, face=C["white"], edge=C["purple"], lw=0.72, radius=0.05, z=5)
+    ax.text(14.83, 1.43, r"$\hat y$", ha="center", va="center", fontsize=7.0, color=C["purple"], fontweight="bold", zorder=8)
+
+    draw_test_nodes(ax, 12.55, 0.75, width=0.84)
+    ax.text(12.55, 0.57, r"$y_{\rm test}$", ha="center", va="center", fontsize=5.0, color=C["muted"], zorder=8)
+    rounded(ax, 14.16, 0.56, 1.01, 0.43, face=C["white"], edge=C["purple"], lw=0.72, radius=0.05, z=5)
+    ax.text(14.665, 0.775, r"score$(\hat y,y)$", ha="center", va="center", fontsize=4.85, color=C["ink"], fontweight="bold", zorder=8)
+    arrow(ax, (12.98, 0.75), (14.13, 0.75), color=C["purple"], lw=0.68, ms=6.0)
+    elbow_arrow(ax, [(14.83, 1.19), (14.83, 1.06), (14.72, 1.01)], color=C["purple"], lw=0.68, ms=5.7)
+
+    ax.plot([12.00, 12.00], [0.74, 1.98], color=C["red"], lw=0.68, linestyle=(0, (2.4, 2.0)), zorder=5)
+    ax.plot([11.91, 12.09], [1.55, 1.73], color=C["red"], lw=1.0, zorder=8)
+    ax.plot([11.91, 12.09], [1.73, 1.55], color=C["red"], lw=1.0, zorder=8)
+    ax.text(12.10, 1.88, "no label route", ha="left", va="center", fontsize=4.45, color=C["red"], zorder=8)
 
 
 def plot_framework(output_path: Path) -> None:
@@ -759,13 +884,14 @@ def plot_framework(output_path: Path) -> None:
     draw_locked_test(ax)
 
     arrow(ax, (2.87, 5.25), (3.19, 5.25), color=C["navy_dark"], lw=1.0, ms=8.5)
-    arrow(ax, (2.82, 2.35), (3.40, 4.70), color=C["blue"], lw=0.88, rad=-0.18, ms=7.5)
-    arrow(ax, (2.82, 1.50), (3.40, 3.82), color=C["green"], lw=0.88, rad=-0.17, ms=7.5)
+    elbow_arrow(ax, [(2.79, 2.20), (2.98, 2.20), (2.98, 4.70), (3.40, 4.70)], color=C["blue"], lw=0.82, ms=7.2)
+    elbow_arrow(ax, [(2.79, 1.62), (3.08, 1.62), (3.08, 3.82), (3.40, 3.82)], color=C["green"], lw=0.82, ms=7.2)
 
     arrow(ax, (11.28, 4.70), (11.75, 4.95), color=C["blue"], lw=0.95, rad=-0.08, ms=8.0)
     arrow(ax, (11.28, 3.82), (11.75, 4.65), color=C["green"], lw=0.95, rad=-0.12, ms=8.0)
     arrow(ax, (13.64, 3.33), (13.64, 3.06), color=C["purple"], lw=1.0, ms=8.0)
-    arrow(ax, (7.33, 3.33), (7.33, 3.06), color=C["navy"], lw=0.75, ms=6.5, style=(0, (3, 2)))
+    arrow(ax, (6.08, 4.31), (5.25, 3.06), color=C["blue"], lw=0.70, rad=0.12, ms=6.3, style=(0, (3, 2)))
+    arrow(ax, (8.94, 3.43), (9.40, 3.06), color=C["green"], lw=0.70, rad=-0.10, ms=6.3, style=(0, (3, 2)))
 
     fig.savefig(output_path, bbox_inches="tight", pad_inches=0.035)
     vector_path = output_path.with_suffix(".pdf")
