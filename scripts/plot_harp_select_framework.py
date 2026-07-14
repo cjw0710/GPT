@@ -867,8 +867,8 @@ def draw_clean_protocol(ax: plt.Axes) -> None:
         0.50,
         2.45,
         5.45,
-        title="Shared graph split",
-        subtitle="fixed once for both experts",
+        title="Shared split",
+        subtitle="one split for both experts",
         face=C["white"],
         title_size=7.15,
     )
@@ -876,19 +876,19 @@ def draw_clean_protocol(ax: plt.Axes) -> None:
     draw_graph(ax, 1.64, 4.45, scale=0.88, edge_color="#748490")
     draw_split_bar(ax, 1.64, 3.72, width=1.70)
 
-    ax.text(1.64, 3.22, "MATCHED PROTOCOL", ha="center", va="center", fontsize=5.45, color=C["navy_dark"], fontweight="bold", zorder=8)
+    ax.text(1.64, 3.22, "MATCHED SETTINGS", ha="center", va="center", fontsize=5.35, color=C["navy_dark"], fontweight="bold", zorder=8)
     protocol_rows = [
-        (2.70, "fixed train/val/test masks"),
-        (2.17, "identical optimizer"),
-        (1.64, "identical training budget"),
+        (2.70, "fixed data masks"),
+        (2.17, "same optimizer"),
+        (1.64, "same training budget"),
     ]
     for y, label in protocol_rows:
         ax.add_patch(Circle((0.82, y), 0.075, facecolor=C["outer"], edgecolor=C["navy"], linewidth=0.65, zorder=6))
         ax.text(0.82, y, "=", ha="center", va="center", fontsize=4.7, color=C["navy"], fontweight="bold", zorder=8)
-        ax.text(1.02, y, label, ha="left", va="center", fontsize=5.05, color=C["ink"], zorder=8)
+        ax.text(1.02, y, label, ha="left", va="center", fontsize=5.10, color=C["ink"], zorder=8)
 
     rounded(ax, 0.72, 0.78, 1.84, 0.40, face=C["outer"], edge=C["line"], lw=0.60, radius=0.05, z=4)
-    ax.text(1.64, 0.98, r"shared $(G,X)$ and labels", ha="center", va="center", fontsize=4.95, color=C["muted"], zorder=8)
+    ax.text(1.64, 0.98, r"shared graph and labels", ha="center", va="center", fontsize=4.95, color=C["muted"], zorder=8)
 
 
 def draw_clean_experts(ax: plt.Axes) -> None:
@@ -914,8 +914,8 @@ def draw_clean_experts(ax: plt.Axes) -> None:
     ]
     for y0, cy, soft, color, dark, name in lane_specs:
         rounded(ax, 3.36, y0, 7.53, 0.94, face=soft, edge=color, lw=0.82, radius=0.065, z=2)
-        rounded(ax, 3.48, cy - 0.17, 1.05, 0.34, face=color, edge=dark, lw=0.50, radius=0.05, z=7)
-        ax.text(4.005, cy, name, ha="center", va="center", fontsize=5.05, color=C["white"], fontweight="bold", zorder=9)
+        rounded(ax, 3.46, cy - 0.17, 1.13, 0.34, face=color, edge=dark, lw=0.50, radius=0.05, z=7)
+        ax.text(4.025, cy, name, ha="center", va="center", fontsize=4.92, color=C["white"], fontweight="bold", zorder=9)
 
     top_y, bottom_y = 4.32, 3.20
     draw_graph_stack(ax, columns[0], top_y, scale=0.34, color=C["blue"], loops=True)
@@ -992,7 +992,7 @@ def draw_clean_selector(ax: plt.Axes) -> None:
     draw_lock(ax, 13.49, 2.28, scale=0.58)
 
     ax.plot([11.72, 15.27], [2.06, 2.06], color=C["red"], lw=0.72, linestyle=(0, (3, 2)), zorder=5)
-    ax.text(13.49, 1.93, "test labels revealed after branch lock", ha="center", va="center", fontsize=4.75, color=C["red"], zorder=8)
+    ax.text(13.49, 1.93, "labels revealed after expert lock", ha="center", va="center", fontsize=4.75, color=C["red"], zorder=8)
 
     draw_graph(ax, 12.12, 1.38, scale=0.39, edge_color="#7f8b96", edge_alpha=0.72, lw=0.58)
     ax.text(12.12, 1.06, r"$G_{\rm test}$", ha="center", va="center", fontsize=4.9, color=C["muted"], zorder=8)
@@ -1007,9 +1007,9 @@ def draw_clean_selector(ax: plt.Axes) -> None:
     draw_test_nodes(ax, 12.28, 0.76, width=0.82)
     ax.text(12.28, 0.58, r"$y_{\rm test}$", ha="center", va="center", fontsize=4.7, color=C["muted"], zorder=8)
     arrow(ax, (12.71, 0.76), (14.05, 0.76), color=C["purple"], lw=0.64, ms=5.5)
-    rounded(ax, 14.08, 0.56, 1.00, 0.42, face=C["white"], edge=C["purple"], lw=0.68, radius=0.05, z=5)
-    ax.text(14.58, 0.77, r"score$(\hat y,y)$", ha="center", va="center", fontsize=4.65, color=C["ink"], fontweight="bold", zorder=8)
-    elbow_arrow(ax, [(14.65, 1.12), (14.65, 1.02), (14.60, 1.00)], color=C["purple"], lw=0.62, ms=5.0)
+    rounded(ax, 14.03, 0.56, 1.14, 0.42, face=C["white"], edge=C["purple"], lw=0.68, radius=0.05, z=5)
+    ax.text(14.60, 0.77, r"score$(\hat y,y)$", ha="center", va="center", fontsize=4.65, color=C["ink"], fontweight="bold", zorder=8)
+    elbow_arrow(ax, [(14.65, 1.12), (14.65, 1.02), (14.62, 1.00)], color=C["purple"], lw=0.62, ms=5.0)
 
 
 def plot_framework(output_path: Path) -> None:
