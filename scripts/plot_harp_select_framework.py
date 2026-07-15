@@ -887,8 +887,9 @@ def draw_clean_protocol(ax: plt.Axes) -> None:
         ax.text(0.82, y, "=", ha="center", va="center", fontsize=4.7, color=C["navy"], fontweight="bold", zorder=8)
         ax.text(1.02, y, label, ha="left", va="center", fontsize=5.10, color=C["ink"], zorder=8)
 
-    rounded(ax, 0.72, 0.78, 1.84, 0.40, face=C["outer"], edge=C["line"], lw=0.60, radius=0.05, z=4)
-    ax.text(1.64, 0.98, r"shared graph and labels", ha="center", va="center", fontsize=4.95, color=C["muted"], zorder=8)
+    rounded(ax, 0.72, 0.70, 1.84, 0.58, face=C["outer"], edge=C["line"], lw=0.60, radius=0.05, z=4)
+    ax.text(1.64, 1.06, "shared data", ha="center", va="center", fontsize=4.75, color=C["muted"], zorder=8)
+    ax.text(1.64, 0.84, r"$(G,X,y_{\rm train})$", ha="center", va="center", fontsize=5.10, color=C["ink"], zorder=8)
 
 
 def draw_clean_experts(ax: plt.Axes) -> None:
